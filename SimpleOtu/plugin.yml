@@ -1,0 +1,52 @@
+name: SimpleOtu
+version: 1.0.0
+api: [1.12.0]
+author: beito
+authors: ["yf001", "akaituki8126"]
+description: 荒らしを牢屋へ入れたりすることができるようになります。
+main: beito\otu\MainClass
+commands:
+  otu:
+    description: "荒らしを牢屋へ"
+    usage: "/otu <プレーヤー名>"
+    permission: "otu.command.otu"
+  otup:
+    description: "牢屋の場所を指定"
+    usage: "/otup <add|del|list|help>"
+    permission: "otu.command.pos"
+  runa:
+    description: "otuされた人を動けなくする"
+    usage: "/runa <プレーヤー名>"
+    permission: "otu.command.runa"
+  otulist:
+    description: "otuやRunaされているプレーヤー一覧を表示します"
+    usage: "/otulist [otu|runa] [ページ番号]"
+    permission: "otu.command.otulist"
+permissions:
+  otu:
+    default: op
+    description: "otuのすべての機能を使用することができます"
+    children:
+     otu.command:
+       default: op
+       description: "otuのすべてのコマンドを使用することができます"
+       children:
+        otu.command.otu:
+          default: op
+          description: "/otuを使用できるようになります"
+        otu.command.pos:
+          default: op
+          description: "/otupを使用できるようになります"
+        otu.command.runa:
+          default: op
+          description: "/runaを使用できるようになります"
+        otu.command.otulist:
+          default: op
+          description: "/otulistを使用できるようになります"
+     otu.allow:
+       default: op
+       description: "otuによる制限の一部の解除などを使用できます"
+       children:
+        otu.allow.otucommand:
+         default: op
+         description: "otuやrunaされている場合でもコマンドで解除できるようになります"
