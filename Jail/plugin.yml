@@ -1,0 +1,38 @@
+name: Jail
+version: 1.0.0
+api: [1.12.0]
+author: beito
+authors: ["yf001"]
+description: 荒らしをその場で牢屋に入れることができます。
+main: beito\jail\MainClass
+commands:
+  jail:
+    description: "プレーヤーをその場で牢屋に入れます"
+    usage: "/jail <プレーヤー名> [牢屋名]"
+    permission: "otu.command.jail"
+  unjail:
+    description: "直前に設置した牢屋を撤去します"
+    usage: "/unjail"
+    permission: "otu.command.unjail"
+  unjailall:
+    description: "設置された牢屋をすべて撤去します"
+    usage: "/unjailall"
+    permission: "otu.command.unjailall"
+permissions:
+  jail:
+    default: op
+    description: "jailのすべての機能を使用することができます"
+    children:
+     jail.command:
+       default: op
+       description: "otuのすべてのコマンドを使用することができます"
+       children:
+        otu.command.jail:
+          default: op
+          description: "/jailを使えるようになります"
+        otu.command.unjail:
+          default: op
+          description: "/unjailを使えるようになります"
+        otu.command.unjailall:
+          default: op
+          description: "/unjailallを使えるようになります"
