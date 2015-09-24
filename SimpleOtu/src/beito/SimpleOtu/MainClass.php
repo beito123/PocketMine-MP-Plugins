@@ -18,7 +18,7 @@
  * 
 */
 
-namespace beito\otu;
+namespace beito\SimpleOtu;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -46,7 +46,7 @@ use pocketmine\event\block\BlockPlaceEvent;
 
 class MainClass extends PluginBase implements Listener {
 	
-	const API = 1.0;
+	const API = 1.1;
 	
 	private $config, $messages, $jailMode;
 	
@@ -93,6 +93,13 @@ class MainClass extends PluginBase implements Listener {
 		"otulist-first-message" => "%1プレーヤー一覧 (%2/%3) :",
 		"otulist-first-message-console" => "%1されたプレーヤー一覧 :",
 		"otulist-message" => "%1, ",
+		"console-auto-release" => "自動釈放により%1さんの%2を解除しました。",
+		"console-otu" => "%1さんが%2さんをotuしました。",
+		"console-otu-release" => "%1さんが%2さんのotuを解除しました。",
+		"console-runa" => "%1さんが%2さんをrunaしました。",
+		"console-runa-release" => "%1さんが%2さんのrunaを解除しました。",
+		"console-jail-add" => "%1さんが牢屋を追加しました。",
+		"console-jail-del" => "%1さんが牢屋%2を削除しました。",
 	];
 	
 	//中途半端なAPIなため一部API削除(恐らく最低でもEventとか用意しないと用途がない?)
@@ -105,12 +112,28 @@ class MainClass extends PluginBase implements Listener {
 		return isset($this->players["otu"][$name]);
 	}
 	
-	public function setOtu($name, $bool){
-		if($bool){
+	public function setOtu($name, $on = true){
+		if($on){
 			$this->players["otu"][$name] = true;
 		}else{
 			unset($this->players["otu"][$name]);
 		}
+	}
+
+	public function getRespawnPosition($name){
+		if($this->isOtu($name)){
+			$jail = $this->players["otu"][$name];
+			return ($jail instanceof Position) ? $jail:false;
+		}
+		return false;
+	}
+
+	public function setRespawnPosition($name, Position $jail){
+		if($this->isOtu($name)){
+			$this->players["otu"][$name] = $jail;
+			return true;
+		}
+		return false;
 	}
 	
 	public function getRunaPlayers(){
@@ -121,8 +144,8 @@ class MainClass extends PluginBase implements Listener {
 		return isset($this->players["runa"][$name]);
 	}
 	
-	public function setRuna($name, $bool){
-		if($bool){
+	public function setRuna($name, $on = true){
+		if($on){
 			$this->players["runa"][$name] = true;
 		}else{
 			unset($this->players["runa"][$name]);
@@ -157,18 +180,16 @@ class MainClass extends PluginBase implements Listener {
 		return $this->settings["jailMode"];
 	}
 	
-	public function getSelectJail($sender, Player $player, $mode){
+	public function getSelectJail($sender, $mode){
 		switch($mode){
 			case "auto":
-			case "auto-level":
+			case "auto-level"://プレーヤーと同じレベルでかつ、一番近い牢屋を返します
 				if($sender instanceof Player){
 					$level = $sender->getLevel();
 					$jails = array();
 					foreach($this->jails as $pos){
 						if($pos->getLevel() === $level){
-							$key = $sender->distanceSquared($pos);
-							$jails[$key] = $pos;
-							//return $pos;
+							$jails[$sender->distanceSquared($pos)] = $pos;
 						}
 					}
 					ksort($jails);
@@ -177,13 +198,19 @@ class MainClass extends PluginBase implements Listener {
 					}
 				}
 			break;
+			case "random"://ランダムな牢屋を返します
+				if(count($this->jails) > 0){
+					return $this->jails[array_rand($this->jails)];
+				}
+			break;
 		}
-		if(substr($mode, 0, 5) === "jail-"){
+		if(substr($mode, 0, 5) === "jail-"){//jail-* の形式で指定された牢屋を返します
 			if(isset($this->jails[substr($this->jailMode, 5)])){
 				return $this->jails[substr($this->jailMode, 5)];
 			}
 		}
-		return isset($this->jails[0]) ? $this->jails[0]:new Position(0, 0, 0, Server::getInstance()->getDefaultLevel());
+		//どれにも当てはまらない又は条件に一致するものがない場合はデフォルトのワールドのスポーンを返します
+		return (($pos = reset($this->jails)) === false) ? Server::getInstance()->getDefaultLevel()->getSafeSpawn():$pos;
 	}
 	
 	public function isAutoRelease(){
@@ -196,6 +223,10 @@ class MainClass extends PluginBase implements Listener {
 	
 	public function isShowLogToConsole(){
 		return $this->settings["showLogToConsole"];
+	}
+
+	public function getSetting($name){
+		return (isset($this->settings[$name])) ? $this->settings[$name]:false;
 	}
 	
 	public function onEnable(){
@@ -224,8 +255,8 @@ class MainClass extends PluginBase implements Listener {
 				if(Server::getInstance()->isLevelLoaded($exp[3])){
 					$this->jails[$key] = new Position($exp[0], $exp[1], $exp[2], Server::getInstance()->getLevelByName($exp[3]));
 				}else{
-					$this->jails[$key] = new Position(0, 0, 0, Server::getInstance()->getDefaultLevel());
-					$this->getLogger()->notice("otuの牢屋." . $key . " に指定されたワールドが読み込まれていません。 デフォルトのワールドを使用します。");
+					$this->jails[$key] = new Position($exp[0], $exp[1], $exp[2], Server::getInstance()->getDefaultLevel());
+					$this->getLogger()->notice("牢屋 " . $key . " に指定されたワールドが読み込まれていません。 デフォルトのワールドを使用します。");
 				}
 			}
 		}else{
@@ -296,11 +327,15 @@ class MainClass extends PluginBase implements Listener {
 		}
 	}
 	
-	public function onRespawn(PlayerRespawnEvent $event){//途中...
+	public function onRespawn(PlayerRespawnEvent $event){
 		$player = $event->getPlayer();
 		if($this->isOtu($player->getName()) or $this->isRuna($player->getName())){
 			if($this->isAutoRespawnInJail()){
-				$event->setRespawnPosition($event->getRespawnPosition());
+				$respawn = $event->getRespawnPosition();
+				if(!(($pos = $this->getRespawnPosition($player->getName())) === false)){//todo 関数名が紛らわしいので後で変更
+					$respawn = $pos;
+				}
+				$event->setRespawnPosition($respawn);
 			}
 		}
 	}
@@ -313,7 +348,7 @@ class MainClass extends PluginBase implements Listener {
 				$this->setRuna($player->getName(), false);
 				$type = ($this->isOtu($player->getName())) ? "otu":"runa";
 				if($this->isShowLogToConsole()){
-					$this->getLogger()->info("自動釈放により" . $player->getName() . "さんの" . $type . "を解除しました");
+					$this->getLogger()->notice($this->getCustomMessage("console-auto-release", array($player->getName(), $type)));
 				}
 			}
 		}
@@ -334,12 +369,14 @@ class MainClass extends PluginBase implements Listener {
 				if(!$this->isOtu($name)){
 					$this->setOtu($name, true);
 					$this->sendCustomMessage($sender, "otued-sender", array($name));
+					$jail = $this->getSelectJail($sender, $this->getJailSelectMode());
 					if($player instanceof Player){
-						$player->teleport($this->getSelectJail($sender, $player, $this->getJailSelectMode()));
+						$player->teleport($jail);
 						$this->sendCustomMessage($player, "otued-player", array($sender->getName()));
 					}
+					$this->setRespawnPosition($name, $jail);
 					if(!($sender instanceof ConsoleCommandSender) and $this->isShowLogToConsole()){
-						$this->getLogger()->info($sender->getName() . "さんが" . $name . "さんにotuをしました");
+						$this->getLogger()->notice($this->getCustomMessage("console-otu", array($sender->getName(), $name)));
 					}
 				}else{
 					if($player instanceof Player){
@@ -353,7 +390,7 @@ class MainClass extends PluginBase implements Listener {
 					$this->setOtu($name, false);
 					$this->sendCustomMessage($sender, "otu-release-sender", array("%1" => $name));
 					if(!($sender instanceof ConsoleCommandSender) and $this->isShowLogToConsole()){
-						$this->getLogger()->info($sender->getName() . "さんが" . $name . "さんのotuを解除しました");
+						$this->getLogger()->notice($this->getCustomMessage("console-otu-release", array($sender->getName(), $name)));
 					}
 				}
 				return true;
@@ -373,7 +410,7 @@ class MainClass extends PluginBase implements Listener {
 						$this->sendCustomMessage($player, "runaed-player", array($sender->getName()));
 					}
 					if(!($sender instanceof ConsoleCommandSender) and $this->isShowLogToConsole()){
-						$this->getLogger()->info($sender->getName() . "さんが" . $name . "さんにrunaをしました");
+						$this->getLogger()->notice($this->getCustomMessage("console-runa", array($sender->getName(), $name)));
 					}
 				}else{
 					$this->setRuna($name, false);
@@ -382,7 +419,7 @@ class MainClass extends PluginBase implements Listener {
 						$this->sendCustomMessage($player, "runa-release-player", array($sender->getName()));
 					}
 					if(!($sender instanceof ConsoleCommandSender) and $this->isShowLogToConsole()){
-						$this->getLogger()->info($sender->getName() . "さんが" . $name . "さんのrunaを解除しました");
+						$this->getLogger()->notice($this->getCustomMessage("console-runa-release", array($sender->getName(), $name)));
 					}
 				}
 				return true;
@@ -408,7 +445,7 @@ class MainClass extends PluginBase implements Listener {
 					$list = (isset($l[$page])) ? $l[$page]:array();
 				}
 				
-				if(!($sender instanceof ConsoleCommandSender)){//floor(count($this->jails) / 4) + 1)
+				if(!($sender instanceof ConsoleCommandSender)){
 					$message = $this->getCustomMessage("otulist-first-message", array($type, $page + 1, floor(count($list) / 4) + 1)) . "\n";
 				}else{
 					$message = $this->getCustomMessage("otulist-first-message-console", array($type, $page + 1, floor(count($list) / 4) + 1)) . "\n";
@@ -458,7 +495,7 @@ class MainClass extends PluginBase implements Listener {
 							$this->addOtuJail($name, new Position($x, $y, $z, $level));
 							$this->sendCustomMessage($sender, "otup-jail-success");
 							if(!($sender instanceof ConsoleCommandSender) and $this->isShowLogToConsole()){
-								$this->getLogger()->info($sender->getName() . "さんがotu牢屋を追加しました");
+								$this->getLogger()->notice($this->getCustomMessage("console-jail-add", array($sender->getName())));
 							}
 						}else{
 							$this->sendCustomMessage($sender, "otup-coordinates-must-be-number");
@@ -474,6 +511,7 @@ class MainClass extends PluginBase implements Listener {
 							$this->sendCustomMessage($sender, "otup-del-success", array($args[1]));
 							if(!($sender instanceof ConsoleCommandSender) and $this->isShowLogToConsole()){
 								$this->getLogger()->info($sender->getName() . "さんがotu牢屋 " . $args[1] . "を削除しました");
+								$this->getLogger()->notice($this->getCustomMessage("console-jail-del", array($sender->getName(), $args[1])));
 							}
 						}else{
 							$this->sendCustomMessage($sender, "otup-del-not-exist");
@@ -514,7 +552,7 @@ class MainClass extends PluginBase implements Listener {
 	
 	public function getCustomMessage($key, $args = array()){
 		$message = (isset($this->messages[$key])) ? $this->messages[$key]:"";
-		if($message !== ""){//何も記載していない場合は表示されないように(非表示機能)
+		if($message !== ""){
 			$i = 1;
 			foreach($args as $value){
 				$message = str_replace("%" . $i, $value, $message);
@@ -534,7 +572,7 @@ class MainClass extends PluginBase implements Listener {
 	}
 	
 	public function save(){
-		$players = new Config($this->getDataFolder() . "players.yml", Config::YAML);
+		$players = new Config($this->getDataFolder() . "players.yml", Config::YAML, array("otu" => array(), "runa" => array()));
 		$players->setAll($this->players);
 		$players->save();
 		$jailsdata = array();
