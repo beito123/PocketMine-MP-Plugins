@@ -1,6 +1,0 @@
-name: BugFix
-version: 1.0.0
-api: [1.13.0]
-author: beito
-description: PocketMine-MP-Bleedingでのクラフトバグを改善します
-main: beito\BugFix\MainClass
