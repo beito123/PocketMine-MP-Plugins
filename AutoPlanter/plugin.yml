@@ -1,0 +1,6 @@
+name: AutoPlanter
+version: 1.0.0
+api: [1.12.0]
+author: beito
+description: 自動で種を植えます
+main: beito\AutoPlanter\MainClass
