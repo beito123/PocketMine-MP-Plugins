@@ -14,7 +14,9 @@ use pocketmine\math\Vector3;
 
 class MainClass extends PluginBase implements Listener {
 
-	private $blocks = array(), $task = -1;
+	private $taskid = -1;
+
+	private $blocks = array();
 
 	public function onEnable(){	
 		Server::getInstance()->getPluginManager()->registerEvents($this, $this);
@@ -23,21 +25,17 @@ class MainClass extends PluginBase implements Listener {
 	public function onBreak(BlockBreakEvent $event){
 		$block = $event->getBlock();
 		if($block instanceof Crops and !$event->getItem()->isHoe()){
-			//$this->blocks[] = $block;
-			$this->blocks[microtime(true) + mt_rand(1, 5) . "." . mt_rand(0, 5)] = $block;
-			$this->runTask();
+			if($block->getId() === Block::PUMPKIN_STEM or $block->getId() === Block::MELON_STEM){
+				$event->setCancelled();
+			}else{
+				$this->blocks[microtime(true) + mt_rand(1, 5) . "." . mt_rand(0, 5)] = $block;
+				$this->runTask();
+			}
 		}
 	}
 
 	public function runBlockPlace(){
-		echo "test";
 		foreach($this->blocks as $key => $block){
-			/*if(mt_rand(0, 2) === 0){
-				if($block->getLevel()->getBlock($block->getSide(Vector3::SIDE_DOWN))->getId() === Block::FARMLAND){
-					$block->getLevel()->setBlock($block, Block::get($block->getId(), 0));
-				}
-				unset($this->blocks[$key]);
-			}*/
 			if($key <= microtime(true)){
 				if($block->getLevel()->getBlock($block->getSide(Vector3::SIDE_DOWN))->getId() === Block::FARMLAND){
 					$block->getLevel()->setBlock($block, Block::get($block->getId(), 0));
@@ -45,22 +43,22 @@ class MainClass extends PluginBase implements Listener {
 				unset($this->blocks[$key]);
 			}
 		}
-		if(!(count($this->blocks) > 0)){
+		if(count($this->blocks) <= 0){
 			$this->cancelTask();
 		}
 	}
 
 	public function runTask(){
-		if(Server::getInstance()->getScheduler()->isQueued($this->task)){
+		if(Server::getInstance()->getScheduler()->isQueued($this->taskid)){
 			return false;
 		}
-		$this->task = Server::getInstance()->getScheduler()->scheduleDelayedRepeatingTask(new BlockPlaceTask($this), 20, 20)->getTaskId();
+		$this->taskid = Server::getInstance()->getScheduler()->scheduleDelayedRepeatingTask(new BlockPlaceTask($this), 20, 20)->getTaskId();
 		return true;
 	}
 
 	public function cancelTask(){
-		if(Server::getInstance()->getScheduler()->isQueued($this->task)){
-			Server::getInstance()->getScheduler()->cancelTask($this->task);
+		if(Server::getInstance()->getScheduler()->isQueued($this->taskid)){
+			Server::getInstance()->getScheduler()->cancelTask($this->taskid);
 		}
 	}
 }
