@@ -1,4 +1,4 @@
-#BugFix - Bata
+#BugFix - Dev
 PocketMine-MP-Bleeding(mcpe-0.12)でのバグを改善します。</br>
 </br>
 <b>注意!: このプラグインはバグの影響を改善させるもので根本的に修正するわけではありません。</b></br>

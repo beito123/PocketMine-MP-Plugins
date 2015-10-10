@@ -110,6 +110,7 @@ class MainClass extends PluginBase implements Listener {
 				}
 			}
 
+			$debug = "";
 			$contents = $player->getInventory()->getContents();
 			foreach($items as $item){//材料アイテムをプレーヤーからとる
 				$count = $item->getCount();
@@ -119,18 +120,12 @@ class MainClass extends PluginBase implements Listener {
 					if($item->equals($i, $checkDamage, $checkTags)){
 						$nc = min($i->getCount(), $count);
 						$count -= $nc;
-						/*echo "test:" . $i . "\n";
-						$i->setCount($i->getCount() - $nc);
-
-						echo $i . "\ncount." . $count . "\nnc." . $nc . "\nbc." . $item->getCount() . "\n\n";
-						if($i->getCount() <= 0){
-							$player->getInventory()->clear($slot);
-						}*/
 						$newItem = clone $i;
 						$newItem->setCount($i->getCount() - $nc);
 						$player->getInventory()->setItem($slot, $newItem);
-						echo "test:" . $i . "\n";
-						echo $newItem . "\ncount." . $count . "\nnc." . $nc . "\nbc." . $item->getCount() . "\n\n";
+						$debug .= "test:" . $i . "\n";
+
+						$debug .= $newItem . "\ncount." . $count . "\nnc." . $nc . "\nbc." . $item->getCount() . "\n\n";
 					}
 					if($count <= 0){
 						break;
@@ -140,13 +135,14 @@ class MainClass extends PluginBase implements Listener {
 					continue;//...
 				}
 			}
-			echo "result:". $recipe->getResult() . "\n\n";
+			$debug .= "result:". $recipe->getResult() . "\n\n";
 			$extra = $player->getInventory()->addItem($recipe->getResult());//完成後のアイテムをインベントリへ
 			if(count($extra) > 0){
 				foreach($extra as $item){//インベントリが一杯だった場合はその場にドロップさせる
 					$player->getLevel()->dropItem($player, $item);
 				}
 			}
+			$this->getLogger()->debug($debug);
 		}else{
 			$event->setCancelled();
 		}
