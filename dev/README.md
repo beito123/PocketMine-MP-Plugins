@@ -1,5 +1,5 @@
 #PocketMine-Plugins
-My plugins for PocketMine-MP.</br>
+These plugins are being developed.</br>
 
 ##ライセンス
 ここにあるプラグインは特に記載がない限り以下のGNU LGPLv3ライセンス下で配布されています。</br>
