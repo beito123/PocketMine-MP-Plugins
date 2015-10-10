@@ -1,0 +1,8 @@
+---
+jail-success: '%1さんを牢屋に入れました!'
+jail-type-not-exist: 指定された牢屋が存在しません。
+jail-not-contacted: '%1さんは接続していません。'
+unjail-success: 牢屋を撤去しました。
+unjail-not-placed: 牢屋が設置されていません。
+unjailall-success: '%1個の牢屋を撤去しました。'
+...

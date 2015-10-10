@@ -9,15 +9,15 @@ commands:
   jail:
     description: "プレーヤーをその場で牢屋に入れます"
     usage: "/jail <プレーヤー名> [牢屋名]"
-    permission: "otu.command.jail"
+    permission: "jail.command.jail"
   unjail:
     description: "直前に設置した牢屋を撤去します"
     usage: "/unjail"
-    permission: "otu.command.unjail"
+    permission: "jail.command.unjail"
   unjailall:
     description: "設置された牢屋をすべて撤去します"
     usage: "/unjailall"
-    permission: "otu.command.unjailall"
+    permission: "jail.command.unjailall"
 permissions:
   jail:
     default: op
@@ -27,12 +27,12 @@ permissions:
        default: op
        description: "otuのすべてのコマンドを使用することができます"
        children:
-        otu.command.jail:
+        jail.command.jail:
           default: op
           description: "/jailを使えるようになります"
-        otu.command.unjail:
+        jail.command.unjail:
           default: op
           description: "/unjailを使えるようになります"
-        otu.command.unjailall:
+        jail.command.unjailall:
           default: op
           description: "/unjailallを使えるようになります"
