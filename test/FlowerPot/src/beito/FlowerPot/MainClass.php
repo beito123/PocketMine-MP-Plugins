@@ -30,26 +30,25 @@ use pocketmine\inventory\ShapedRecipe;
 
 use pocketmine\Server;
 
+use beito\FlowerPot\omake\Skull;
+use beito\FlowerPot\omake\BlockSkull;
+use beito\FlowerPot\omake\ItemSkull;
+
 class MainClass extends PluginBase{
 
 	const ITEM_FLOWER_POT = 390;
 
 	const BLOCK_FLOWER_POT = 140;
 
+	const ITEM_SKULL = 397;
+
+	const BLOCK_SKULL = 144;
+
 	public function onEnable(){
 		//アイテムの追加
 		Item::$list[self::ITEM_FLOWER_POT] = ItemFlowerPot::class;
 		//ブロックの追加
-		Block::$list[self::BLOCK_FLOWER_POT] = BlockFlowerPot::class;
-		$block = new BlockFlowerPot();
-		for($data = 0; $data < 16; ++$data){
-			Block::$fullList[(self::BLOCK_FLOWER_POT << 4) | $data] = new BlockFlowerPot($data);
-		}
-		Block::$solid[self::BLOCK_FLOWER_POT] = $block->isSolid();
-		Block::$transparent[self::BLOCK_FLOWER_POT] = $block->isTransparent();
-		Block::$hardness[self::BLOCK_FLOWER_POT] = $block->getHardness();
-		Block::$light[self::BLOCK_FLOWER_POT] = $block->getLightLevel();
-		Block::$lightFilter[self::BLOCK_FLOWER_POT] = 1;
+		$this->registerBlock(self::BLOCK_FLOWER_POT, BlockFlowerPot::class);
 		//ブロックタイルエンティティの追加
 		Tile::registerTile(FlowerPot::class);
 		//アイテムをクリエイティブタブに追加
@@ -59,5 +58,33 @@ class MainClass extends PluginBase{
 			"X X",
 			" X "
 		))->setIngredient("X", Item::get(Item::BRICK, null)));
+
+		//omake skull
+		
+		//アイテムの追加
+		Item::$list[self::ITEM_SKULL] = ItemSkull::class;
+		//ブロックの追加
+		$this->registerBlock(self::BLOCK_SKULL, BlockSkull::class);
+		//ブロックタイルエンティティの追加
+		Tile::registerTile(Skull::class);
+		//アイテムをクリエイティブタブに追加
+		Item::addCreativeItem(Item::get(self::ITEM_SKULL, 0));
+		Item::addCreativeItem(Item::get(self::ITEM_SKULL, 1));
+		Item::addCreativeItem(Item::get(self::ITEM_SKULL, 2));
+		Item::addCreativeItem(Item::get(self::ITEM_SKULL, 3));
+		Item::addCreativeItem(Item::get(self::ITEM_SKULL, 4));
+	}
+
+	public function registerBlock($id, $class){
+		Block::$list[$id] = $class;
+		$block = new $class();
+		for($data = 0; $data < 16; ++$data){
+			Block::$fullList[($id << 4) | $data] = new $class($data);
+		}
+		Block::$solid[$id] = $block->isSolid();
+		Block::$transparent[$id] = $block->isTransparent();
+		Block::$hardness[$id] = $block->getHardness();
+		Block::$light[$id] = $block->getLightLevel();
+		Block::$lightFilter[$id] = 1;
 	}
 }

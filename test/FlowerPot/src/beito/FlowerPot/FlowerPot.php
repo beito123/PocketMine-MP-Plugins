@@ -30,8 +30,6 @@ use pocketmine\nbt\tag\String;
 use pocketmine\tile\Tile;
 use pocketmine\tile\Spawnable;
 
-use pocketmine\network\protocol\UpdateBlockPacket;
-
 class FlowerPot extends Spawnable{
 
 	public function __construct(FullChunk $chunk, Compound $nbt){
@@ -65,8 +63,12 @@ class FlowerPot extends Spawnable{
 		if($this->chunk){
 			$this->chunk->setChanged();
 			$this->level->clearChunkCache($this->chunk->getX(), $this->chunk->getZ());
+
+			$block = $this->level->getBlock($this);
+			if($block->getId() === MainClass::BLOCK_FLOWER_POT){
+				$this->level->setBlock($this, Block::get(MainClass::BLOCK_FLOWER_POT, ($block->getDamage() === 0 ? 1:0)), true);//bad hack...
+			}
 		}
-		$this->level->setBlock($this, Block::get(MainClass::BLOCK_FLOWER_POT, 1));//bad...
 		return true;
 	}
 
