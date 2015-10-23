@@ -97,8 +97,8 @@ class BlockSkull extends Transparent{
 
 	public function getDrops(Item $item){
 		if(($tile = $this->getLevel()->getTile($this)) instanceof Skull){
-			return [MainClass::ITEM_SKULL, $tile->getSkullType(), 1];
+			return [[MainClass::ITEM_SKULL, $tile->getSkullType(), 1]];
 		}
-		return [MainClass::ITEM_SKULL, 0, 1];
+		return [[MainClass::ITEM_SKULL, 0, 1]];
 	}
 }
