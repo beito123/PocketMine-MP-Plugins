@@ -72,7 +72,7 @@ class BlockSkull extends Transparent{
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		if($face !== 0){
-			$this->getLevel()->setBlock($block, Block::get(MainClass::BLOCK_SKULL, $face), true, true);
+			$this->getLevel()->setBlock($block, Block::get(MainClass::BLOCK_SKULL, 0), true, true);
 			$nbt = new Compound("", [
 				new String("id", Tile::SKULL),
 				new Int("x", $block->x),
@@ -84,11 +84,7 @@ class BlockSkull extends Transparent{
 			$chunk = $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4);
 			$pot = Tile::createTile("Skull", $chunk, $nbt);
 
-			$players = $this->getLevel()->getChunkPlayers($this->x >> 4, $this->z >> 4);
-			foreach($players as $p){
-				$p->onChunkChanged($chunk);//bad hack...
-			}
-
+			$this->getLevel()->setBlock($block, Block::get(MainClass::BLOCK_SKULL, $face), true, true);
 			return true;
 		}
 		return false;
