@@ -73,7 +73,7 @@ class BlockFlowerPot extends Transparent{
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		if($this->getSide(Vector3::SIDE_DOWN)->isTransparent() === false){
-			$this->getLevel()->setBlock($block, $this, true, true);
+			$this->getLevel()->setBlock($this, $this, true, true);
 			$nbt = new Compound("", [
 				new String("id", Tile::FLOWER_POT),
 				new Int("x", $block->x),
@@ -110,8 +110,8 @@ class BlockFlowerPot extends Transparent{
 					case Item::RED_MUSHROOM:
 					case Item::CACTUS:
 						$tile->setFlowerPotData($item->getId(), $item->getDamage());
+						$this->level->setBlock($this, Block::get(MainClass::BLOCK_FLOWER_POT, ($this->meta === 0 ? 1:0)), true);//bad hack...
 						if($player->isSurvival()){
-							//$item->setCount($item->getCount() - 1);
 							$item->count--;
 						}
 						return true;

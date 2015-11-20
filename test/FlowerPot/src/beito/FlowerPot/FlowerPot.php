@@ -33,41 +33,50 @@ use pocketmine\tile\Spawnable;
 class FlowerPot extends Spawnable{
 
 	public function __construct(FullChunk $chunk, Compound $nbt){
-		if(!isset($nbt->item)){
-			$nbt->item = new Short("item", 0);
+		if(isset($nbt->item)){
+			$nbt->Item = new Short("Item", $nbt["item"]);
+			unset($nbt["item"]);
+		}elseif(isset($nbt->Item) and $nbt->Item->getType() === NBT::TAG_Int){
+ 			$nbt->Item = new Short("Item", (int) $nbt["Item"]);
 		}
-		if(!isset($nbt->data)){
-			$nbt->data = new Int("data", 0);
+
+		if(isset($nbt->data)){
+			$nbt->Data = new Int("Data", $nbt["data"]);
+			unset($nbt["data"]);
+		}elseif(isset($nbt->mData)){
+			$nbt->Data = new Int("Data", $nbt["mData"]);
+		}
+
+		if(!isset($nbt->Item)){
+			$nbt->Item = new Short("Item", 0);
+		}
+		if(!isset($nbt->Data)){
+			$nbt->Data = new Int("Data", 0);
 		}
 		parent::__construct($chunk, $nbt);
 	}
 
 	public function getFlowerPotItem(){
-		return $this->namedtag["item"];
+		return (int) $this->namedtag["Item"];
 	}
 
 	public function getFlowerPotData(){
-		return $this->namedtag["data"];
+		return (int) $this->namedtag["Data"];
 	}
 
 	/**
-	 * 植木鉢(FlowerPot)にデータを設定します
-	 * @param int $item アイテムID
-	 * @param int $data メタ値
+	 * Set flower data to FlowerPot
+	 * @param int $item itemid
+	 * @param int $data metadata
 	 */
 	public function setFlowerPotData($item, $data){
-		$this->namedtag->item = new Short("item", (int) $item);
-		$this->namedtag->data = new Int("data", (int) $data);
+		$this->namedtag->Item = new Short("Item", (int) $item);
+		$this->namedtag->Data = new Int("Data", (int) $data);
 		$this->spawnToAll();
 
 		if($this->chunk){
 			$this->chunk->setChanged();
 			$this->level->clearChunkCache($this->chunk->getX(), $this->chunk->getZ());
-
-			$block = $this->level->getBlock($this);
-			if($block->getId() === MainClass::BLOCK_FLOWER_POT){
-				$this->level->setBlock($this, Block::get(MainClass::BLOCK_FLOWER_POT, ($block->getDamage() === 0 ? 1:0)), true);//bad hack...
-			}
 		}
 		return true;
 	}
@@ -78,8 +87,8 @@ class FlowerPot extends Spawnable{
 			new Int("x", (int) $this->x),
 			new Int("y", (int) $this->y),
 			new Int("z", (int) $this->z),
-			new Short("item", (int) $this->namedtag["item"]),
-			new Int("data", (int) $this->namedtag["data"])
+			new Short("item", (int) $this->namedtag["Item"]),
+			new Int("mData", (int) $this->namedtag["Data"])
 		]);	
 	}
 }

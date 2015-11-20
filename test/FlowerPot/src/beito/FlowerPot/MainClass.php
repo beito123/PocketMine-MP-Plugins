@@ -24,15 +24,16 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\block\Block;
 use pocketmine\item\Item;
 use pocketmine\tile\Tile;
+use pocketmine\entity\Entity;
 
 use pocketmine\inventory\CraftingManager;
 use pocketmine\inventory\ShapedRecipe;
 
 use pocketmine\Server;
 
-use beito\FlowerPot\omake\Skull;
-use beito\FlowerPot\omake\BlockSkull;
-use beito\FlowerPot\omake\ItemSkull;
+use beito\FlowerPot\omake\Skull\Skull;
+use beito\FlowerPot\omake\Skull\BlockSkull;
+use beito\FlowerPot\omake\Skull\ItemSkull;
 
 class MainClass extends PluginBase{
 

@@ -17,14 +17,32 @@
  * 
 */
 
-namespace beito\FlowerPot;
+namespace beito\FlowerPot\omake\Skull;
 
 use pocketmine\block\Block;
 use pocketmine\item\Item;
 
-class ItemFlowerPot extends Item{
+use beito\FlowerPot\MainClass;
+
+class ItemSkull extends Item{
+
+	const SKELETON_SKULL = 0;
+	const WITHER_SKELETON_SKULL = 1;
+	const ZOMBIE_HEAD = 2;
+	const HEAD = 3;
+	const CREEPER_HEAD = 4;
+
+	public static $names = [
+		self::SKELETON_SKULL => "Skeleton Skull",
+		self::WITHER_SKELETON_SKULL => "Wither Skeleton Skull",
+		self::ZOMBIE_HEAD => "Zombie Head",
+		self::HEAD => "Head",
+		self::CREEPER_HEAD => "Creeper Head",
+	];
+
 	public function __construct($meta = 0, $count = 1){
-		$this->block = Block::get(MainClass::BLOCK_FLOWER_POT);
-		parent::__construct(MainClass::ITEM_FLOWER_POT, 0, $count, "Flower Pot");
+		$this->block = Block::get(MainClass::BLOCK_SKULL);
+		$name = (isset(self::$names[$meta])) ? self::$names[$meta]:"Mob Head";
+		parent::__construct(MainClass::ITEM_SKULL, $meta, $count, $name);
 	}
 }
