@@ -35,6 +35,9 @@ use beito\FlowerPot\omake\Skull\Skull;
 use beito\FlowerPot\omake\Skull\BlockSkull;
 use beito\FlowerPot\omake\Skull\ItemSkull;
 
+use beito\FlowerPot\omake\Note\Note;
+use beito\FlowerPot\omake\Note\BlockNote;
+
 class MainClass extends PluginBase{
 
 	const ITEM_FLOWER_POT = 390;
@@ -44,6 +47,10 @@ class MainClass extends PluginBase{
 	const ITEM_SKULL = 397;
 
 	const BLOCK_SKULL = 144;
+
+	const BLOCK_NOTE = 25;
+
+	const TILE_NOTE = "Music";
 
 	public function onEnable(){
 		//アイテムの追加
@@ -74,6 +81,12 @@ class MainClass extends PluginBase{
 		Item::addCreativeItem(Item::get(self::ITEM_SKULL, 2));
 		Item::addCreativeItem(Item::get(self::ITEM_SKULL, 3));
 		Item::addCreativeItem(Item::get(self::ITEM_SKULL, 4));
+
+		//omake note block
+		
+		$this->registerBlock(self::BLOCK_NOTE, BlockNote::class);
+		Tile::registerTile(Note::class);
+		Item::addCreativeItem(Item::get(self::BLOCK_NOTE, 0));
 	}
 
 	public function registerBlock($id, $class){
