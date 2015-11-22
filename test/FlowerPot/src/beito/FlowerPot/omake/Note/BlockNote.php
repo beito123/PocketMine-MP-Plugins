@@ -67,17 +67,19 @@ class BlockNote extends Solid{
 	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		$this->getLevel()->setBlock($this, $this, true, true);
-		$nbt = new Compound("", [
-			new String("id", MainClass::TILE_NOTE),
-			new Int("x", $block->x),
-			new Int("y", $block->y),
-			new Int("z", $block->z),
-			new Byte("note", 0),
-			new Byte("powered", 0)
-		]);
-		$pot = Tile::createTile("Note", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
-		return true;
+		if(!$target->canBeActivated()){
+			$this->getLevel()->setBlock($this, $this, true, true);
+			$nbt = new Compound("", [
+				new String("id", MainClass::TILE_NOTE),
+				new Int("x", $block->x),
+				new Int("y", $block->y),
+				new Int("z", $block->z),
+				new Byte("note", 0),
+				new Byte("powered", 0)
+			]);
+			$pot = Tile::createTile("Note", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
+			return true;
+		}
 	}
 
 	public function getInstrument(){
@@ -115,9 +117,41 @@ class BlockNote extends Solid{
 			case Block::GLASS:
 			case Block::GLASS_PANE:
 				return self::INSTRUMENT_CLICKS;
-			case Block::STONE://todo all stone materials...
+			case Block::STONE:
 			case Block::COBBLESTONE:
+			case Block::SANDSTONE:
+			case Block::MOSS_STONE:
+			case Block::BRICKS:
 			case Block::STONE_BRICK:
+			case Block::NETHER_BRICKS:
+			case Block::QUARTZ_BLOCK:
+			case Block::SLAB:
+			case Block::COBBLESTONE_STAIRS:
+			case Block::BRICK_STAIRS:
+			case Block::STONE_BRICK_STAIRS:
+			case Block::NETHER_BRICKS_STAIRS:
+			case Block::SANDSTONE_STAIRS:
+			case Block::QUARTZ_STAIRS:
+			case Block::COBBLESTONE_WALL:
+			case Block::NETHER_BRICK_FENCE:
+			case Block::BEDROCK:
+			case Block::GOLD_ORE:
+			case Block::IRON_ORE:
+			case Block::COAL_ORE:
+			case Block::LAPIS_ORE:
+			case Block::DIAMOND_ORE:
+			case Block::REDSTONE_ORE:
+			case Block::GLOWING_REDSTONE_ORE:
+			case Block::EMERALD_ORE:
+			case Block::FURNACE:
+			case Block::BURNING_FURNACE:
+			case Block::OBSIDIAN:
+			case Block::MONSTER_SPAWNER:
+			case Block::NETHERRACK:
+			case Block::ENCHANTING_TABLE:
+			case Block::END_STONE:
+			case Block::STAINED_CLAY:
+			case Block::COAL_BLOCK:
 				return self::INSTRUMENT_BASEDRUM;
 		}
 		return self::INSTRUMENT_PIANO;
@@ -139,6 +173,8 @@ class BlockNote extends Solid{
 			}else{
 				$tile->setNote($note + 1);
 			}
+			return true;
 		}
+		return false;
 	}
 }

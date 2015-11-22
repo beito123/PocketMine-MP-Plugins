@@ -61,7 +61,7 @@ class MainClass extends PluginBase{
 		Tile::registerTile(FlowerPot::class);
 		//アイテムをクリエイティブタブに追加
 		Item::addCreativeItem(Item::get(self::ITEM_FLOWER_POT, 0));
-		//一応レシピ追加
+		//一応レシピの追加
 		Server::getInstance()->getCraftingManager()->registerRecipe((new ShapedRecipe(Item::get(MainClass::ITEM_FLOWER_POT, 0, 1),
 			"X X",
 			" X "
@@ -84,9 +84,18 @@ class MainClass extends PluginBase{
 
 		//omake note block
 		
+		//ブロックの追加
 		$this->registerBlock(self::BLOCK_NOTE, BlockNote::class);
+		//ブロックタイルエンティティの追加
 		Tile::registerTile(Note::class);
+		//アイテムをクリエイティブタブに追加
 		Item::addCreativeItem(Item::get(self::BLOCK_NOTE, 0));
+		//一応レシピの追加
+		Server::getInstance()->getCraftingManager()->registerRecipe((new ShapedRecipe(Item::get(MainClass::ITEM_FLOWER_POT, 0, 1),
+			"XXX",
+			"XYX",
+			"XXX"
+		))->setIngredient("X", Item::get(Item::WOODEN_PLANK, null))->setIngredient("Y", Item::get(Item::REDSTONE, 0)));
 	}
 
 	public function registerBlock($id, $class){
