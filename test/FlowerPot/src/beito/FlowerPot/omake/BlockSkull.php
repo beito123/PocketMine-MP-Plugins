@@ -60,9 +60,9 @@ class BlockSkull extends Transparent{
 
 	public function getBoundingBox(){//todo fix
 		return new AxisAlignedBB(
-			$this->x,
-			$this->y,
-			$this->z,
+			$this->x - 0.75,
+			$this->y - 0.5,
+			$this->z - 0.75,
 			$this->x + 0.75,
 			$this->y + 0.5,
 			$this->z + 0.75
