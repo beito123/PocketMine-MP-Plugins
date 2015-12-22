@@ -59,11 +59,11 @@ class BlockFlowerPot extends Transparent{
 		return "Flower Pot";
 	}
 
-	public function getBoundingBox(){//todo fix...
+	public function getBoundingBox(){
 		return new AxisAlignedBB(
-			$this->x,
-			$this->y,
-			$this->z,
+			$this->x - 0.6875,
+			$this->y - 0.375,
+			$this->z - 0.6875,
 			$this->x + 0.6875,
 			$this->y + 0.375,
 			$this->z + 0.6875
