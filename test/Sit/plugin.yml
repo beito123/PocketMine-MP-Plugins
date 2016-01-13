@@ -1,0 +1,23 @@
+name: Sit
+version: 1.0.0
+api: [1.13.0]
+author: beito
+load: STARTUP
+main: beito\sit\MainClass
+commands:
+  sit:
+    description: "その場で座ります"
+    usage: "/sit"
+    permission: "sit.command.sit"
+permissions:
+  sit:
+    default: op
+    description: "Sitのすべての機能を使用することができます"
+    children:
+     sit.command:
+       default: op
+       description: "Sitのすべてのコマンドを使用することができます"
+       children:
+        sit.command.sit:
+          default: true
+          description: "/sitを使えるようになります"
