@@ -24,7 +24,7 @@ use pocketmine\entity\Item;
 use pocketmine\Player;
 use pocketmine\Server;
 
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\network\protocol\SetEntityLinkPacket;
@@ -87,7 +87,7 @@ class Chair extends Entity {
 
 	public function saveNBT(){
 		parent::saveNBT();
-		$this->namedtag->remove = new Byte("remove", 1);//remove flag
+		$this->namedtag->remove = new ByteTag("remove", 1);//remove flag
 	}
 
 	//
