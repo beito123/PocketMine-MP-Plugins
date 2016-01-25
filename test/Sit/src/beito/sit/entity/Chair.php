@@ -10,9 +10,9 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
@@ -44,7 +44,7 @@ class Chair extends Entity {
 	protected function initEntity(){
 		parent::initEntity();
 
-		if(isset($this->namedtag->remove)){
+		if(isset($this->namedtag->remove)){//flag check
 			$this->kill();
 		}
 	}
@@ -79,7 +79,7 @@ class Chair extends Entity {
 	public function close(){
 		if(!$this->closed){
 			if($this->sittingEntity !== null){
-				$this->standSittingEntity();
+				$this->standupSittingEntity();
 			}
 		}
 		parent::close();
@@ -87,7 +87,7 @@ class Chair extends Entity {
 
 	public function saveNBT(){
 		parent::saveNBT();
-		$this->namedtag->remove = new Byte("remove", 1);//
+		$this->namedtag->remove = new Byte("remove", 1);//remove flag
 	}
 
 	//
@@ -112,7 +112,7 @@ class Chair extends Entity {
 		return true;
 	}
 
-	public function standSittingEntity(){
+	public function standupSittingEntity(){
 		if($this->sittingEntity === null){
 			return false;
 		}
@@ -128,7 +128,7 @@ class Chair extends Entity {
 	}
 
 	public function sendLinkPacket(Player $player, $type){
-		if($this->sittingEntity == null){
+		if($this->sittingEntity === null){
 			return false;
 		}
 		$pk = new SetEntityLinkPacket();
@@ -141,7 +141,7 @@ class Chair extends Entity {
 	}
 
 	public function sendLinkPacketToSittingPlayer($type){
-		if($this->sittingEntity == null or !($this->sittingEntity instanceof Player)){
+		if($this->sittingEntity === null or !($this->sittingEntity instanceof Player)){
 			return false;
 		}
 
@@ -155,7 +155,7 @@ class Chair extends Entity {
 	}
 
 	public function sendLinkPacketToAll($type){
-		if($this->sittingEntity == null){
+		if($this->sittingEntity === null){
 			return false;
 		}
 

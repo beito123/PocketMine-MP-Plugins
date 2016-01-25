@@ -10,9 +10,9 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
@@ -25,6 +25,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDespawnEvent;
 use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\event\player\PlayerBedEnterEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\Server;
 use pocketmine\Player;
@@ -44,7 +45,7 @@ use beito\sit\entity\Chair;
 
 class MainClass extends PluginBase implements Listener {
 
-	private $sittingPlayers = array();
+	private $usedChairs = array();
 
 	public function onEnable(){
 		Entity::registerEntity(Chair::class, true);
@@ -52,50 +53,40 @@ class MainClass extends PluginBase implements Listener {
 	}
 
 	public function onDisable(){
-		foreach($this->sittingPlayers as $chair){
+		foreach($this->usedChairs as $chair){
 			$chair->close();
 		}
 	}
 
 	public function onDeath(PlayerDeathEvent $event){//死亡時用close
-		$entity = $event->getEntity();
-		if(isset($this->sittingPlayers[$entity->getName()])){
-			$this->sittingPlayers[$entity->getName()]->close();
-			unset($this->sittingPlayers[$entity->getName()]);
-		}
+		$this->closeOldChair($event->getEntity());
 	}
 
 	public function onDespawn(EntityDespawnEvent $event){//退出時などにChairをcloseするように
 		$entity = $event->getEntity();
 		if($entity instanceof Player){
-			if(isset($this->sittingPlayers[$entity->getName()])){
-				$this->sittingPlayers[$entity->getName()]->close();
-				unset($this->sittingPlayers[$entity->getName()]);
-			}
+			$this->closeOldChair($entity);
 		}
+	}
+
+	public function onBedEnter(PlayerBedEnterEvent $event){//対策...
+		$this->closeOldChair($event->getPlayer());
 	}
 
 	public function onInteract(DataPacketReceiveEvent $event){
 		$packet = $event->getPacket();
-		switch($packet::NETWORK_ID){
-			case Info::INTERACT_PACKET:
-				$player = $event->getPlayer();
-
+		if($event->getPacket()->pid() === Info::INTERACT_PACKET){
+			$packet = $event->getPacket();
+			$player = $event->getPlayer();
+			
+			$target = $player->getLevel()->getEntity($packet->target);
+			if($target instanceof Chair){
 				$action = $packet->action;
-				$target = $player->level->getEntity($packet->target);
-				if($target instanceof Chair){
-					if($action === 2 or $action === 3){
-						if($event->getPlayer() == $target->getSittingEntity()){
-							$target->standSittingEntity();
-						}
-						$target->close();
-						if(isset($this->sittingPlayers[$player->getName()])){
-							$this->sittingPlayers[$player->getName()]->close();
-							unset($this->sittingPlayers[$player->getName()]);
-						}
-					}
+				if($action === 2 or $action === 3){
+					$target->standupSittingEntity();
+					$target->close();
 				}
-				break;
+			}
 		}
 	}
 
@@ -107,10 +98,11 @@ class MainClass extends PluginBase implements Listener {
 					break;
 				}
 
-				if(isset($this->sittingPlayers[$sender->getName()])){
-					$this->sittingPlayers[$sender->getName()]->close();
-					unset($this->sittingPlayers[$sender->getName()]);
+				if($sender->isSleeping()){//対策...
+					$sender->stopSleep();
 				}
+
+				$this->closeOldChair($sender);
 
 				$x = $sender->getX();
 				$y = $sender->getY();
@@ -120,7 +112,8 @@ class MainClass extends PluginBase implements Listener {
 					$y = (((int) $y) - 1) + 0.2;
 					$z = ((int) $z) + 0.5;
 				}else{
-					$y -= 0.3;
+					$y -= 0.2;
+					//$y = ((int) $y) - 0.25;
 				}
 
 				$entity = Entity::createEntity("Chair", $sender->chunk, new Compound("", [
@@ -143,9 +136,18 @@ class MainClass extends PluginBase implements Listener {
 
 				$entity->sitEntity($sender);
 
-				$this->sittingPlayers[$sender->getName()] = $entity;
+				$sender->sendTip("ジャンプすることで立ち上がれます");
+
+				$this->usedChairs[$sender->getName()] = $entity;
 				break;
 		}
 		return true;
+	}
+
+	public function closeOldChair(Player $player){
+		if(isset($this->usedChairs[$player->getName()])){
+			$this->usedChairs[$player->getName()]->close();
+			unset($this->usedChairs[$player->getName()]);
+		}
 	}
 }
