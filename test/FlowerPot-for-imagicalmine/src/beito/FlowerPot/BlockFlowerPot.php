@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2015 beito
+ * Copyright (c) 2015-2016 beito
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -10,9 +10,9 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
@@ -59,11 +59,11 @@ class BlockFlowerPot extends Transparent{
 		return "Flower Pot";
 	}
 
-	public function getBoundingBox(){//todo fix...
+	public function getBoundingBox(){
 		return new AxisAlignedBB(
-			$this->x,
-			$this->y,
-			$this->z,
+			$this->x - 0.6875,
+			$this->y - 0.375,
+			$this->z - 0.6875,
 			$this->x + 0.6875,
 			$this->y + 0.375,
 			$this->z + 0.6875
@@ -73,7 +73,7 @@ class BlockFlowerPot extends Transparent{
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		if($this->getSide(Vector3::SIDE_DOWN)->isTransparent() === false){
-			$this->getLevel()->setBlock($this, $this, true, true);
+			$this->getLevel()->setBlock($block, $this, true, true);
 			$nbt = new Compound("", [
 				new String("id", Tile::FLOWER_POT),
 				new Int("x", $block->x),
@@ -110,8 +110,9 @@ class BlockFlowerPot extends Transparent{
 					case Item::RED_MUSHROOM:
 					case Item::CACTUS:
 						$tile->setFlowerPotData($item->getId(), $item->getDamage());
-						$this->level->setBlock($this, Block::get(MainClass::BLOCK_FLOWER_POT, ($this->meta === 0 ? 1:0)), true);//bad hack...
+						$this->getLevel()->setBlock($this, Block::get($this->id, ($this->meta === 1) ? 0:1), true, true);//bad code...
 						if($player->isSurvival()){
+							//$item->setCount($item->getCount() - 1);
 							$item->count--;
 						}
 						return true;

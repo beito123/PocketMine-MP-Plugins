@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2015 beito
+ * Copyright (c) 2015-2016 beito
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -10,14 +10,14 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
 
-namespace beito\FlowerPot\omake\Note;
+namespace beito\FlowerPot\extra\Note;
 
 use pocketmine\block\Air;
 use pocketmine\block\Block;
@@ -41,12 +41,6 @@ use pocketmine\network\protocol\TileEventPacket;
 use beito\FlowerPot\MainClass;
 
 class BlockNote extends Solid{
-
-	const INSTRUMENT_PIANO = 0;
-	const INSTRUMENT_BASEDRUM = 1;
-	const INSTRUMENT_SNARE = 2;
-	const INSTRUMENT_CLICKS = 3;
-	const INSTRUMENT_BASEGUITAR = 4;
 
 	protected $id = MainClass::BLOCK_NOTE;
 
@@ -74,8 +68,7 @@ class BlockNote extends Solid{
 				new Int("x", $block->x),
 				new Int("y", $block->y),
 				new Int("z", $block->z),
-				new Byte("note", 0),
-				new Byte("powered", 0)
+				new Byte("note", 0)
 			]);
 			$pot = Tile::createTile("Note", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 			return true;
@@ -84,7 +77,7 @@ class BlockNote extends Solid{
 
 	public function getInstrument(){
 		$downblock = $this->level->getBlock($this->getSide(Vector3::SIDE_DOWN));
-		switch($downblock->getId()){//materials...
+		switch($downblock->getId()){//materials...//hmm...
 			case Block::WOOD:
 			case Block::WOOD2:
 			case Block::WOODEN_PLANK:
@@ -111,12 +104,12 @@ class BlockNote extends Solid{
 			case Block::WALL_SIGN:
 			case Block::DOOR_BLOCK:
 			case MainClass::BLOCK_NOTE:
-				return self::INSTRUMENT_BASEGUITAR;
+				return NoteSound::INSTRUMENT_BASEGUITAR;
 			case Block::SAND:
-				return self::INSTRUMENT_SNARE;
+				return NoteSound::INSTRUMENT_SNARE;
 			case Block::GLASS:
 			case Block::GLASS_PANE:
-				return self::INSTRUMENT_CLICKS;
+				return NoteSound::INSTRUMENT_CLICKS;
 			case Block::STONE:
 			case Block::COBBLESTONE:
 			case Block::SANDSTONE:
@@ -152,27 +145,22 @@ class BlockNote extends Solid{
 			case Block::END_STONE:
 			case Block::STAINED_CLAY:
 			case Block::COAL_BLOCK:
-				return self::INSTRUMENT_BASEDRUM;
+				return NoteSound::INSTRUMENT_BASEDRUM;
 		}
-		return self::INSTRUMENT_PIANO;
+		return NoteSound::INSTRUMENT_PIANO;
 	}
 
 	public function onActivate(Item $item, Player $player = null){
 		$tile = $this->level->getTile($this);
 		if($tile instanceof Note){
-			$pk = new TileEventPacket();
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->case1 = $this->getInstrument();
-			$pk->case2 = $tile->getNote();
-			$this->level->addChunkPacket($this->x >> 4, $this->z >> 4, $pk);
-			$note = $tile->getNote();
-			if($note < 0 or $note >= 24){
-				$tile->setNote(0);
-			}else{
-				$tile->setNote($note + 1);
+			$instrument = $this->getInstrument();
+			$pitch = $tile->getNote() + 1;
+			if($pitch < 0 or $pitch > 24){
+				$pitch = 0;
 			}
+			$tile->setNote($pitch);
+
+			$this->level->addSound(new NoteSound($this, $instrument, $pitch));
 			return true;
 		}
 		return false;

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2015 beito
+ * Copyright (c) 2015-2016 beito
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -10,14 +10,14 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
 
-namespace beito\FlowerPot\omake\Note;
+namespace beito\FlowerPot\extra\Note;
 
 use pocketmine\block\Block;
 use pocketmine\level\format\FullChunk;
@@ -38,9 +38,6 @@ class Note extends Spawnable{
 		if(!isset($nbt->note)){
 			$nbt->note = new Byte("note", 0);
 		}
-		if(!isset($nbt->powered)){
-			$nbt->powered = new Byte("powered", 0);
-		}
 		parent::__construct($chunk, $nbt);
 	}
 
@@ -48,16 +45,8 @@ class Note extends Spawnable{
 		return $this->namedtag["note"];
 	}
 
-	public function getPowered(){
-		return $this->namedtag["powered"] === 1;
-	}
-
 	public function setNote($note){
 		$this->namedtag->note = new Byte("note", $note);
-	}
-
-	public function setPowered($bool){
-		$this->namedtag->powered = new Byte("powered", ($bool === true ? 1:0));
 	}
 
 	public function getSpawnCompound(){
@@ -66,8 +55,7 @@ class Note extends Spawnable{
 			new Int("x", (int) $this->x),
 			new Int("y", (int) $this->y),
 			new Int("z", (int) $this->z),
-			new Byte("note", $this->namedtag["note"]),
-			new Byte("powered", $this->namedtag["powered"])
+			new Byte("note", $this->namedtag["note"])
 		]);	
 	}
 }

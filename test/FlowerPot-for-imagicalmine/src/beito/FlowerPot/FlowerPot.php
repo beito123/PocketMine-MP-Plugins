@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2015 beito
+ * Copyright (c) 2015-2016 beito
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -10,9 +10,9 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
@@ -33,20 +33,6 @@ use pocketmine\tile\Spawnable;
 class FlowerPot extends Spawnable{
 
 	public function __construct(FullChunk $chunk, Compound $nbt){
-		if(isset($nbt->item)){
-			$nbt->Item = new Short("Item", $nbt["item"]);
-			unset($nbt["item"]);
-		}elseif(isset($nbt->Item) and $nbt->Item->getType() === NBT::TAG_Int){
- 			$nbt->Item = new Short("Item", (int) $nbt["Item"]);
-		}
-
-		if(isset($nbt->data)){
-			$nbt->Data = new Int("Data", $nbt["data"]);
-			unset($nbt["data"]);
-		}elseif(isset($nbt->mData)){
-			$nbt->Data = new Int("Data", $nbt["mData"]);
-		}
-
 		if(!isset($nbt->Item)){
 			$nbt->Item = new Short("Item", 0);
 		}
@@ -72,6 +58,7 @@ class FlowerPot extends Spawnable{
 	public function setFlowerPotData($item, $data){
 		$this->namedtag->Item = new Short("Item", (int) $item);
 		$this->namedtag->Data = new Int("Data", (int) $data);
+		
 		$this->spawnToAll();
 
 		if($this->chunk){
