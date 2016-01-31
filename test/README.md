@@ -1,5 +1,5 @@
 #PocketMine-Plugins
-These plugins are being tested.</br>
+These plugins is in the testing phase.</br>
 
 ##ライセンス
 ここにあるプラグインは特に記載がない限り以下のGNU LGPLv3ライセンス下で配布されています。</br>
