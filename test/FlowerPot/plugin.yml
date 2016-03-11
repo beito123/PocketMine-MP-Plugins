@@ -1,0 +1,6 @@
+name: FlowerPot
+version: 1.0.5
+api: [2.0.0]
+author: beito
+main: beito\FlowerPot\MainClass
+load: STARTUP
