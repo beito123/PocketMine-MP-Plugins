@@ -23,7 +23,7 @@ use pocketmine\block\Block;
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ByteTag;
@@ -45,8 +45,8 @@ class Cauldron extends Spawnable{
 		if(!isset($nbt->SplashPotion)){
 			$nbt->SplashPotion = new ByteTag("SplashPotion", 0);
 		}
-		if(!isset($nbt->Items) or !($nbt->Items instanceof EnumTag)){
-			$nbt->Items = new EnumTag("Items", []);
+		if(!isset($nbt->Items) or !($nbt->Items instanceof ListTag)){
+			$nbt->Items = new ListTag("Items", []);
 		}
 		if(!isset($nbt->CustomColor)){
 			$nbt->CustomColor = new IntTag("CustomColor", 0xffffffff);//bgr??rgba???
@@ -92,7 +92,7 @@ class Cauldron extends Spawnable{
 			new IntTag("z", (Int) $this->z),
 			new ShortTag("PotionId", $this->namedtag["PotionId"]),
 			new ByteTag("SplashPotion", $this->namedtag["SplashPotion"]),
-			new EnumTag("Items", $this->namedtag["Items"])
+			new ListTag("Items", $this->namedtag["Items"])
 		]);
 
 		if($this->namedtag["PotionId"] & 0xffff and !($this->namedtag["CustomColor"] & 0xffffffff)){

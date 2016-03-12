@@ -124,6 +124,8 @@ class MainClass extends PluginBase implements Listener {
 
 		//extra: note block
 		
+		//add item(block)
+		Item::$list[self::BLOCK_NOTE] = BlockNote::class;
 		//add block
 		$this->registerBlock(self::BLOCK_NOTE, BlockNote::class);
 		//add block entity(tile)
@@ -161,7 +163,7 @@ class MainClass extends PluginBase implements Listener {
 	public function onPacketReceive(DataPacketReceiveEvent $event){
 		$packet = $event->getPacket();
 		if($packet::NETWORK_ID === MainClass::PROTOCOL_ITEM_FRAME_DROP_ITEM_PACKET){
-			var_dump($packet);//debug
+			//var_dump($packet);//debug
 			
 			$player = $event->getPlayer();
 
@@ -189,12 +191,10 @@ class MainClass extends PluginBase implements Listener {
 		Block::$transparent[$id] = $block->isTransparent();
 		Block::$hardness[$id] = $block->getHardness();
 		Block::$light[$id] = $block->getLightLevel();
-		Block::$lightFilter[$id] = 1;
+		Block::$lightFilter[$id] = 1;//
 	}
 
 	public function addCreativeItem(Item $item){
-		if(!Item::isCreativeItem($item)){
-			Item::addCreativeItem($item);
-		}
+		Item::addCreativeItem($item);
 	}
 }

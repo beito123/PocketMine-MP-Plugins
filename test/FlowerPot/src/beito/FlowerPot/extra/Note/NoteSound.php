@@ -20,9 +20,10 @@
 namespace beito\FlowerPot\extra\Note;
 
 use pocketmine\level\sound\Sound;
-use pocketmine\network\protocol\TileEventPacket;
+use pocketmine\math\Vector3;
+use pocketmine\network\protocol\BlockEventPacket;
 
-class NoteBlock extends Sound {
+class NoteSound extends Sound {
 
 	const INSTRUMENT_PIANO = 0;
 	const INSTRUMENT_BASEDRUM = 1;
@@ -40,12 +41,12 @@ class NoteBlock extends Sound {
 	}
 
 	public function encode(){
-		$pk = new TileEventPacket();
+		$pk = new BlockEventPacket();
 		$pk->x = $this->x;
 		$pk->y = $this->y;
 		$pk->z = $this->z;
-		$pk->case1 = $instrument;
-		$pk->case2 = $pitch;
+		$pk->case1 = $this->instrument;
+		$pk->case2 = $this->pitch;
 		return $pk;
 	}
 }

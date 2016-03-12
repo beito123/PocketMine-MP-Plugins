@@ -32,7 +32,7 @@ use pocketmine\Server;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\IntTag;
@@ -85,7 +85,7 @@ class BlockCauldron extends Solid {
 			new IntTag("z", $block->z),
 			new ShortTag("PotionId", 0xffff),
 			new ByteTag("SplashPotion", 0),
-			new EnumTag("Items", []),
+			new ListTag("Items", []),
 			new IntTag("CustomColor", 0xffffffff)//umm..
 		]);
 		$chunk = $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4);
@@ -110,6 +110,7 @@ class BlockCauldron extends Solid {
 	}
 
 	public function onActivate(Item $item, Player $player = null){
+		
 		if($item->getId() === Item::BUCKET and $item->getCount() > 0){//bucket
 			switch($item->getDamage()){//todo: call the PlayerBucket(Empty|Fill)Event
 				case 0://empty

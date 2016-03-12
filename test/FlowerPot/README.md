@@ -4,6 +4,8 @@
 
 ※テスト段階のもののためいくつかの不具合が発生する可能性があります。ご了承下さい。</br>
 
-This plugin will implement flower pot, Mob Head, Note Block and Item Frame(experimental).
+This plugin will implement flower pot, Mob Head, Note Block and Item Frame(experimental).</br>
 
-TODO: all rewrite and remove
+TODO: all rewrite and remove</br>
+
+Supported environment(必要な環境): Gensisys#129~#XXX(Ikaros), PocketMine-MP(official-php7)</br>

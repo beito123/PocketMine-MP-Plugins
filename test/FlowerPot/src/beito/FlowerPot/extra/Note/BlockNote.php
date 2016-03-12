@@ -44,8 +44,8 @@ class BlockNote extends Solid{
 
 	protected $id = MainClass::BLOCK_NOTE;
 
-	public function __construct(){
-
+	public function __construct($meta = 0){
+		$this->meta = $meta;
 	}
 
 	public function canBeActivated() : bool{
@@ -61,18 +61,16 @@ class BlockNote extends Solid{
 	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		if(!$target->canBeActivated()){
-			$this->getLevel()->setBlock($this, $this, true, true);
-			$nbt = new CompoundTag("", [
-				new StringTag("id", MainClass::TILE_NOTE),
-				new IntTag("x", $block->x),
-				new IntTag("y", $block->y),
-				new IntTag("z", $block->z),
-				new ByteTag("note", 0)
-			]);
-			$pot = Tile::createTile("Note", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
-			return true;
-		}
+		$this->getLevel()->setBlock($this, $this, true, true);
+		$nbt = new CompoundTag("", [
+			new StringTag("id", MainClass::TILE_NOTE),
+			new IntTag("x", $block->x),
+			new IntTag("y", $block->y),
+			new IntTag("z", $block->z),
+			new ByteTag("note", 0)
+		]);
+		$pot = Tile::createTile("Note", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
+		return true;
 	}
 
 	public function getInstrument(){
