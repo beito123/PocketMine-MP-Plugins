@@ -94,6 +94,8 @@ class MainClass extends PluginBase implements Listener {
 
 	const BLOCK_CAULDRON = 118;
 
+	const EVENT_SOUND_SPLASH = 3506;//umm..
+
 	public function onEnable(){
 		//flower pot
 		//add item

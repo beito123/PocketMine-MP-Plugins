@@ -112,8 +112,7 @@ class BlockFlowerPot extends Transparent{
 						$tile->setFlowerPotData($item->getId(), $item->getDamage());
 						$this->getLevel()->setBlock($this, Block::get($this->id, ($this->meta === 1) ? 0:1), true, true);//bad code...
 						if($player->isSurvival()){
-							//$item->setCount($item->getCount() - 1);
-							$item->count--;
+							$item->setCount($item->getCount() - 1);
 						}
 						return true;
 					break;

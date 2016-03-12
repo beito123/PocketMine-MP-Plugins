@@ -20,6 +20,7 @@
 namespace beito\FlowerPot\extra\Note;
 
 use pocketmine\level\sound\Sound;
+use pocketmine\network\protocol\TileEventPacket;
 
 class NoteBlock extends Sound {
 

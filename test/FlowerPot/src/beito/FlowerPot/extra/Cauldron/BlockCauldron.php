@@ -57,6 +57,10 @@ class BlockCauldron extends Solid {
 		return "Cauldron";
 	}
 
+	public function canBeActivated() : bool{
+		return true;
+	}
+
 	public function getBoundingBox(){//todo fix(?)
 		return new AxisAlignedBB(
 			$this->x,
@@ -96,12 +100,48 @@ class BlockCauldron extends Solid {
 		return true;
 	}
 
-	public function getDrops(Item $item) : array {
+	public function getDrops(Item $item) : array{
 		if($item->isPickaxe() >= 1){
 			return [
 				[MainClass::ITEM_CAULDRON, 0, 1]
 			];
 		}
 		return [];
+	}
+
+	public function onActivate(Item $item, Player $player = null){
+		if($item->getId() === Item::BUCKET and $item->getCount() > 0){//bucket
+			switch($item->getDamage()){//todo: call the PlayerBucket(Empty|Fill)Event
+				case 0://empty
+					if($this->meta === 0x06){//if fill
+						$this->meta = 0x00;//empty
+						$bucket = clone $item;
+						$bucket->setDamage(8);//water bucket
+						$this->getLevel()->setBlock($this, $this, true);
+						if($player->isSurvival()){
+							$player->getInventory()->setItemInHand($bucket, $player);
+						}
+						$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+					}
+					break;
+				case 8://water bucket
+					if($this->meta === 0x00){//if empty
+						$this->meta = 0x06;//fill
+						$bucket = clone $item;
+						$bucket->setDamage(0);//empty bucket
+						$this->getLevel()->setBlock($this, $this, true);
+						if($player->isSurvival()){
+							$player->getInventory()->setItemInHand($bucket, $player);
+						}
+						$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+					}
+					break;
+			}
+		}elseif($item->getId() === Item::POTION or $item->getId() === Item::SPLASH_POTION){
+			//todo
+		}elseif($item->getId() === Item::DYE){
+			//todo
+		}
+		return true;
 	}
 }
