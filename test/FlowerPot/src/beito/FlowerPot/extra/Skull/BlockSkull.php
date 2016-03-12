@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2015 beito
+ * Copyright (c) 2015-2016 beito
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -10,14 +10,14 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
 
-namespace beito\FlowerPot\omake;
+namespace beito\FlowerPot\extra\Skull;
 
 use pocketmine\block\Air;
 use pocketmine\block\Block;
@@ -29,10 +29,10 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 use pocketmine\Server;
 
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Byte;
-use pocketmine\nbt\tag\Int;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Tile;
 use pocketmine\math\Vector3;
 
@@ -54,11 +54,11 @@ class BlockSkull extends Transparent{
 		return false;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Mob Head";
 	}
 
-	public function getBoundingBox(){//todo fix
+	public function getBoundingBox(){//Thanks to thebigsmileXD!
 		return new AxisAlignedBB(
 			$this->x - 0.75,
 			$this->y - 0.5,
@@ -72,14 +72,14 @@ class BlockSkull extends Transparent{
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		if($face !== 0){
-			$this->getLevel()->setBlock($block, Block::get(MainClass::BLOCK_SKULL, 0), true, true);
-			$nbt = new Compound("", [
-				new String("id", Tile::SKULL),
-				new Int("x", $block->x),
-				new Int("y", $block->y),
-				new Int("z", $block->z),
-				new Byte("SkullType", $item->getDamage()),
-				new Byte("Rot", floor(($player->yaw * 16 / 360) + 0.5) & 0x0F),
+			$this->getLevel()->setBlock($block, Block::get(MainClass::BLOCK_SKULL, 0), true, true);//
+			$nbt = new CompoundTag("", [
+				new StringTag("id", Tile::SKULL),
+				new IntTag("x", $block->x),
+				new IntTag("y", $block->y),
+				new IntTag("z", $block->z),
+				new ByteTag("SkullType", $item->getDamage()),
+				new ByteTag("Rot", floor(($player->yaw * 16 / 360) + 0.5) & 0x0F),
 			]);
 			$chunk = $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4);
 			$pot = Tile::createTile("Skull", $chunk, $nbt);
@@ -95,7 +95,7 @@ class BlockSkull extends Transparent{
 		return true;
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) : array{
 		if(($tile = $this->getLevel()->getTile($this)) instanceof Skull){
 			return [[MainClass::ITEM_SKULL, $tile->getSkullType(), 1]];
 		}

@@ -17,14 +17,17 @@
  * 
 */
 
-namespace beito\FlowerPot;
+namespace beito\FlowerPot\extra\Cauldron;
 
 use pocketmine\block\Block;
 use pocketmine\item\Item;
 
-class ItemFlowerPot extends Item{
+use beito\FlowerPot\MainClass;
+
+class ItemCauldron extends Item{
+
 	public function __construct($meta = 0, $count = 1){
-		$this->block = Block::get(MainClass::BLOCK_FLOWER_POT);
-		parent::__construct(MainClass::ITEM_FLOWER_POT, 0, $count, "Flower Pot");
+		$this->block = Block::get(MainClass::BLOCK_CAULDRON);
+		parent::__construct(MainClass::ITEM_CAULDRON, $meta, $count, "Cauldron");
 	}
 }

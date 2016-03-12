@@ -17,14 +17,34 @@
  * 
 */
 
-namespace beito\FlowerPot;
+namespace beito\FlowerPot\extra\Note;
 
-use pocketmine\block\Block;
-use pocketmine\item\Item;
+use pocketmine\level\sound\Sound;
 
-class ItemFlowerPot extends Item{
-	public function __construct($meta = 0, $count = 1){
-		$this->block = Block::get(MainClass::BLOCK_FLOWER_POT);
-		parent::__construct(MainClass::ITEM_FLOWER_POT, 0, $count, "Flower Pot");
+class NoteBlock extends Sound {
+
+	const INSTRUMENT_PIANO = 0;
+	const INSTRUMENT_BASEDRUM = 1;
+	const INSTRUMENT_SNARE = 2;
+	const INSTRUMENT_CLICKS = 3;
+	const INSTRUMENT_BASEGUITAR = 4;
+
+	private $instrument = self::INSTRUMENT_PIANO;
+	private $pitch = 0;//
+
+	public function __construct(Vector3 $pos, $instrument = self::INSTRUMENT_PIANO, $pitch = 0){
+		parent::__construct($pos->x, $pos->y, $pos->z);
+		$this->instrument = $instrument;
+		$this->pitch = $pitch;
+	}
+
+	public function encode(){
+		$pk = new TileEventPacket();
+		$pk->x = $this->x;
+		$pk->y = $this->y;
+		$pk->z = $this->z;
+		$pk->case1 = $instrument;
+		$pk->case2 = $pitch;
+		return $pk;
 	}
 }

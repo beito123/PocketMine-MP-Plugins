@@ -17,65 +17,45 @@
  * 
 */
 
-namespace beito\FlowerPot;
+namespace beito\FlowerPot\extra\Note;
 
 use pocketmine\block\Block;
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 
 use pocketmine\tile\Tile;
 use pocketmine\tile\Spawnable;
 
-class FlowerPot extends Spawnable{
+use beito\FlowerPot\MainClass;
+
+class Note extends Spawnable{
 
 	public function __construct(FullChunk $chunk, CompoundTag $nbt){
-		if(!isset($nbt->Item)){
-			$nbt->Item = new ShortTag("Item", 0);
-		}
-		if(!isset($nbt->Data)){
-			$nbt->Data = new IntTag("Data", 0);
+		if(!isset($nbt->note)){
+			$nbt->note = new ByteTag("note", 0);
 		}
 		parent::__construct($chunk, $nbt);
 	}
 
-	public function getFlowerPotItem(){
-		return (int) $this->namedtag["Item"];
+	public function getNote(){
+		return $this->namedtag["note"];
 	}
 
-	public function getFlowerPotData(){
-		return (int) $this->namedtag["Data"];
-	}
-
-	/**
-	 * Set flower data to FlowerPot
-	 * @param int $item itemid
-	 * @param int $data metadata
-	 */
-	public function setFlowerPotData($item, $data){
-		$this->namedtag->Item = new ShortTag("Item", (int) $item);
-		$this->namedtag->Data = new IntTag("Data", (int) $data);
-		
-		$this->spawnToAll();
-
-		if($this->chunk){
-			$this->chunk->setChanged();
-			$this->level->clearChunkCache($this->chunk->getX(), $this->chunk->getZ());
-		}
-		return true;
+	public function setNote($note){
+		$this->namedtag->note = new ByteTag("note", $note);
 	}
 
 	public function getSpawnCompound(){
 		return new CompoundTag("", [
-			new StringTag("id", Tile::FLOWER_POT),
+			new StringTag("id", MainClass::TILE_NOTE),
 			new IntTag("x", (int) $this->x),
 			new IntTag("y", (int) $this->y),
 			new IntTag("z", (int) $this->z),
-			new ShortTag("item", (int) $this->namedtag["Item"]),
-			new IntTag("mData", (int) $this->namedtag["Data"])
+			new ByteTag("note", $this->namedtag["note"])
 		]);	
 	}
 }

@@ -17,14 +17,30 @@
  * 
 */
 
-namespace beito\FlowerPot;
+namespace beito\FlowerPot\extra\ItemFrame\protocol;
 
-use pocketmine\block\Block;
-use pocketmine\item\Item;
+use pocketmine\network\protocol\DataPacket;
 
-class ItemFlowerPot extends Item{
-	public function __construct($meta = 0, $count = 1){
-		$this->block = Block::get(MainClass::BLOCK_FLOWER_POT);
-		parent::__construct(MainClass::ITEM_FLOWER_POT, 0, $count, "Flower Pot");
+use beito\FlowerPot\MainClass;
+
+class ItemFrameDropPacket extends DataPacket {
+
+	const NETWORK_ID = MainClass::PROTOCOL_ITEM_FRAME_DROP_ITEM_PACKET;
+
+	public $x;
+	public $y;
+	public $z;
+	public $dropItem;
+
+	public function decode(){
+		$this->z = $this->getInt();//hmm...
+		$this->y = $this->getInt();
+		$this->x = $this->getInt();
+		$this->dropItem = $this->getSlot();
+		//unknown...
+	}
+
+	public function encode(){
+
 	}
 }

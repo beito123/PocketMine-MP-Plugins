@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2015 beito
+ * Copyright (c) 2015-2016 beito
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -10,34 +10,36 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
 
-namespace beito\FlowerPot\omake;
+namespace beito\FlowerPot\extra\Skull;
 
 use pocketmine\block\Block;
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Int;
-use pocketmine\nbt\tag\Byte;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\tag\StringTag;
 
 use pocketmine\tile\Tile;
 use pocketmine\tile\Spawnable;
 
+use pocketmine\Server;
+
 class Skull extends Spawnable{
 
-	public function __construct(FullChunk $chunk, Compound $nbt){//todo Owner Tag(?)
+	public function __construct(FullChunk $chunk, CompoundTag $nbt){//todo Owner (?)
 		if(!isset($nbt->SkullType)){
-			$nbt->SkullType = new Byte("SkullType", 0);
+			$nbt->SkullType = new ByteTag("SkullType", 0);
 		}
 		if(!isset($nbt->Rot)){
-			$nbt->Rot = new Byte("Rot", 0);
+			$nbt->Rot = new ByteTag("Rot", 0);
 		}
 		parent::__construct($chunk, $nbt);
 	}
@@ -47,7 +49,7 @@ class Skull extends Spawnable{
 	}
 
 	public function setSkullType($type){
-		$this->namedtag->SkullType = new Byte("SkullType", $type);
+		$this->namedtag->SkullType = new ByteTag("SkullType", $type);
 	}
 
 	public function getSkullRot(){
@@ -55,17 +57,17 @@ class Skull extends Spawnable{
 	}
 
 	public function setSkullRot($rot){
-		$this->namedtag->Rot = new Byte("Rot", $rot);
+		$this->namedtag->Rot = new ByteTag("Rot", $rot);
 	}
 
 	public function getSpawnCompound(){
-		return new Compound("", [
-			new String("id", Tile::SKULL),
-			new Int("x", (int) $this->x),
-			new Int("y", (int) $this->y),
-			new Int("z", (int) $this->z),
-			new Byte("SkullType", (int) $this->namedtag["SkullType"]),
-			new Byte("Rot", (int) $this->namedtag["Rot"])
-		]);	
+		return new CompoundTag("", [
+			new StringTag("id", Tile::SKULL),
+			new IntTag("x", (int) $this->x),
+			new IntTag("y", (int) $this->y),
+			new IntTag("z", (int) $this->z),
+			new ByteTag("SkullType", (int) $this->namedtag["SkullType"]),
+			new ByteTag("Rot", (int) $this->namedtag["Rot"])
+		]);
 	}
 }

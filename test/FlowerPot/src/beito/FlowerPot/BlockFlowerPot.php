@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2015 beito
+ * Copyright (c) 2015-2016 beito
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -10,9 +10,9 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
 */
@@ -29,9 +29,9 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 use pocketmine\Server;
 
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Int;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Tile;
 use pocketmine\math\Vector3;
 
@@ -43,7 +43,7 @@ class BlockFlowerPot extends Transparent{
 		$this->meta = $meta;
 	}
 
-	public function canBeActivated(){
+	public function canBeActivated() : bool{
 		return true;
 	}
 
@@ -55,11 +55,11 @@ class BlockFlowerPot extends Transparent{
 		return false;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Flower Pot";
 	}
 
-	public function getBoundingBox(){
+	public function getBoundingBox(){//Thanks to thebigsmileXD!
 		return new AxisAlignedBB(
 			$this->x - 0.6875,
 			$this->y - 0.375,
@@ -74,13 +74,13 @@ class BlockFlowerPot extends Transparent{
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		if($this->getSide(Vector3::SIDE_DOWN)->isTransparent() === false){
 			$this->getLevel()->setBlock($block, $this, true, true);
-			$nbt = new Compound("", [
-				new String("id", Tile::FLOWER_POT),
-				new Int("x", $block->x),
-				new Int("y", $block->y),
-				new Int("z", $block->z),
-				new Int("item", 0),
-				new Int("data", 0),
+			$nbt = new CompoundTag("", [
+				new StringTag("id", Tile::FLOWER_POT),
+				new IntTag("x", $block->x),
+				new IntTag("y", $block->y),
+				new IntTag("z", $block->z),
+				new IntTag("item", 0),
+				new IntTag("data", 0),
 			]);
 			$pot = Tile::createTile("FlowerPot", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 			return true;
@@ -110,6 +110,7 @@ class BlockFlowerPot extends Transparent{
 					case Item::RED_MUSHROOM:
 					case Item::CACTUS:
 						$tile->setFlowerPotData($item->getId(), $item->getDamage());
+						$this->getLevel()->setBlock($this, Block::get($this->id, ($this->meta === 1) ? 0:1), true, true);//bad code...
 						if($player->isSurvival()){
 							//$item->setCount($item->getCount() - 1);
 							$item->count--;
@@ -133,7 +134,7 @@ class BlockFlowerPot extends Transparent{
 		return false;
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) : array{
 		$items = array([MainClass::ITEM_FLOWER_POT, 0, 1]);
 		if(($tile = $this->getLevel()->getTile($this)) instanceof FlowerPot){
 			if($tile->getFlowerPotItem() !== Item::AIR){

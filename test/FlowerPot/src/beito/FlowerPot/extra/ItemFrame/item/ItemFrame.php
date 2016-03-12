@@ -17,14 +17,21 @@
  * 
 */
 
-namespace beito\FlowerPot;
+namespace beito\FlowerPot\extra\ItemFrame\item;
 
 use pocketmine\block\Block;
 use pocketmine\item\Item;
 
-class ItemFlowerPot extends Item{
+use beito\FlowerPot\MainClass;
+
+use pocketmine\level\Level;
+use pocketmine\Player;
+use pocketmine\tile\Tile;
+
+class ItemFrame extends Item {
+
 	public function __construct($meta = 0, $count = 1){
-		$this->block = Block::get(MainClass::BLOCK_FLOWER_POT);
-		parent::__construct(MainClass::ITEM_FLOWER_POT, 0, $count, "Flower Pot");
+		$this->block = Block::get(MainClass::BLOCK_ITEM_FRAME);
+		parent::__construct(MainClass::ITEM_ITEM_FRAME, 0, $count, "Item Frame");
 	}
 }
