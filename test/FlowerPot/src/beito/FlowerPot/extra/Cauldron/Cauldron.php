@@ -49,7 +49,7 @@ class Cauldron extends Spawnable{
 			$nbt->Items = new ListTag("Items", []);
 		}
 		if(!isset($nbt->CustomColor)){
-			$nbt->CustomColor = new IntTag("CustomColor", 0xffffffff);//bgr??rgba???
+			$nbt->CustomColor = new IntTag("CustomColor", 0xffffffff);//rgb
 		}
 		parent::__construct($chunk, $nbt);
 	}
@@ -70,18 +70,45 @@ class Cauldron extends Spawnable{
 		$this->namedtag->SplashPotion = new ShortTag("SplashPotion", ($bool == true) ? 1:0);
 	}
 
-	public function getCustomColor(){//umm...
+	public function getCustomColor(){//
 		$color = $this->namedtag["CustomColor"];
-		return [
-			($color >> 8)&0xff,//r
-			($color >> 16)&0xff,//g
-			($color >> 24)&0xff//b
-		];
+		$green = ($color >> 8)&0xff;
+		$red = ($color >> 16)&0xff;
+		$blue = ($color)&0xff;
+		return Color::getRGB($red, $green, $blue);
 	}
 
-	public function setCustomColor($r, $g, $b){//umm..
-		$color = ($b << 24 | $g << 16 | $r << 8 | 0xff) & 0xffffffff;
+	public function getCustomColorRed(){
+		return ($this->namedtag["CustomColor"] >> 16)&0xff;
+	}
+
+	public function getCustomColorGreen(){
+		return ($this->namedtag["CustomColor"] >> 8)&0xff;
+	}
+
+	public function getCustomColorBlue(){
+		return ($this->namedtag["CustomColor"])&0xff;
+	}
+
+	public function getCustomColorPadding(){
+		return ($this->namedtag["CustomColor"] >> 24)&0xff;
+	}
+
+	public function setCustomColor($r, $g = 0xff, $b = 0xff, $padding = 0xff){
+		if($r instanceof Color){
+			$c = $r;
+			$r = $c->getRed();
+			$g = $c->getGreen();
+			$b = $c->getBlue();
+		}
+		$color = ($padding << 24 | $r << 16 | $g << 8 | $b) & 0xffffffff;// padding?(4bit), red(4bit), green(4bit), blue(4bit)
 		$this->namedtag->CustomColor = new IntTag("CustomColor", $color);
+
+		$this->spawnToAll();
+		if($this->chunk){
+			$this->chunk->setChanged();
+			$this->level->clearChunkCache($this->chunk->getX(), $this->chunk->getZ());
+		}
 	}
 
 	public function getSpawnCompound(){
@@ -92,10 +119,10 @@ class Cauldron extends Spawnable{
 			new IntTag("z", (Int) $this->z),
 			new ShortTag("PotionId", $this->namedtag["PotionId"]),
 			new ByteTag("SplashPotion", $this->namedtag["SplashPotion"]),
-			new ListTag("Items", $this->namedtag["Items"])
+			new ListTag("Items", $this->namedtag["Items"])//unused?
 		]);
 
-		if($this->namedtag["PotionId"] & 0xffff and !($this->namedtag["CustomColor"] & 0xffffffff)){
+		if($this->getPotionId() === 0xffff and $this->getCustomColorPadding() !== 0x00){//todo: fix conditions
 			$nbt->CustomColor = $this->namedtag->CustomColor;
 		}
 		return $nbt;

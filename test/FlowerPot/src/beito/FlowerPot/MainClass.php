@@ -50,6 +50,7 @@ use beito\FlowerPot\extra\ItemFrame\tile\ItemFrame;
 use beito\FlowerPot\extra\Cauldron\Cauldron;
 use beito\FlowerPot\extra\Cauldron\BlockCauldron;
 use beito\FlowerPot\extra\Cauldron\ItemCauldron;
+use beito\FlowerPot\extra\Cauldron\Color;
 
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -94,7 +95,7 @@ class MainClass extends PluginBase implements Listener {
 
 	const BLOCK_CAULDRON = 118;
 
-	const EVENT_SOUND_SPLASH = 3506;//umm..
+	const EVENT_SOUND_SPLASH = 3506;
 
 	public function onEnable(){
 		//flower pot
@@ -156,6 +157,8 @@ class MainClass extends PluginBase implements Listener {
 		Tile::registerTile(Cauldron::class);
 		//add creative item
 		$this->addCreativeItem(Item::get(self::ITEM_CAULDRON, 0));
+		//init Color
+		Color::init();
 		
 		Server::getInstance()->getPluginManager()->registerEvents($this, $this);
 	}

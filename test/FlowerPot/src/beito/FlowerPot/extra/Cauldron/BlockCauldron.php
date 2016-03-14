@@ -86,7 +86,7 @@ class BlockCauldron extends Solid {
 			new ShortTag("PotionId", 0xffff),
 			new ByteTag("SplashPotion", 0),
 			new ListTag("Items", []),
-			new IntTag("CustomColor", 0xffffffff)//umm..
+			new IntTag("CustomColor", 0x00ffffff)//todo: set default value...(unknown...)//use the padding as a flag...
 		]);
 		$chunk = $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4);
 		$tile = Tile::createTile("Cauldron", $chunk, $nbt);//
@@ -110,39 +110,68 @@ class BlockCauldron extends Solid {
 	}
 
 	public function onActivate(Item $item, Player $player = null){
-		
-		if($item->getId() === Item::BUCKET and $item->getCount() > 0){//bucket
-			switch($item->getDamage()){//todo: call the PlayerBucket(Empty|Fill)Event
-				case 0://empty
-					if($this->meta === 0x06){//if fill
-						$this->meta = 0x00;//empty
-						$bucket = clone $item;
-						$bucket->setDamage(8);//water bucket
-						$this->getLevel()->setBlock($this, $this, true);
-						if($player->isSurvival()){
-							$player->getInventory()->setItemInHand($bucket, $player);
+		$tile = $this->getLevel()->getTile($this);
+		if($tile instanceof Cauldron){
+			if($tile->getPotionId() === 0xff){
+				if($item->getId() === Item::POTION or $item->getId() === Item::SPLASH_POTION){
+					//todo
+				}elseif($item->getId() === Item::BUCKET and $this->getDamage() === 8){//water bucket//todo explosion
+
+				}
+			}else{
+				if($tile->getCustomColorPadding() === 0x00){//water
+					if($item->getId() === Item::BUCKET){//bucket
+						switch($item->getDamage()){//todo: call the PlayerBucket(Empty|Fill)Event
+							case 0://empty
+								if($this->meta === 0x06){//if fill
+									$this->meta = 0x00;//empty
+									$bucket = clone $item;
+									$bucket->setDamage(8);//water bucket
+									$this->getLevel()->setBlock($this, $this, true);
+									if($player->isSurvival()){
+										$player->getInventory()->setItemInHand($bucket, $player);
+									}
+									$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+								}
+								break;
+							case 8://water bucket
+								if($this->meta === 0x00){//if empty
+									$this->meta = 0x06;//fill
+									$bucket = clone $item;
+									$bucket->setDamage(0);//empty bucket
+									$this->getLevel()->setBlock($this, $this, true);
+									if($player->isSurvival()){
+										$player->getInventory()->setItemInHand($bucket, $player);
+									}
+									$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+								}
+								break;
 						}
-						$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
-					}
-					break;
-				case 8://water bucket
-					if($this->meta === 0x00){//if empty
-						$this->meta = 0x06;//fill
-						$bucket = clone $item;
-						$bucket->setDamage(0);//empty bucket
-						$this->getLevel()->setBlock($this, $this, true);
-						if($player->isSurvival()){
-							$player->getInventory()->setItemInHand($bucket, $player);
+					}elseif($item->getId() === Item::DYE and $this->meta > 0){//set dye color
+						$color = Color::getDyeColor($item->getDamage());
+						if($color != null){
+							$tile->setCustomColor($color);
+							$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
 						}
-						$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
 					}
-					break;
+				}else{//colored water
+					if($item->getId() === Item::DYE){
+						$color = Color::getDyeColor($item->getDamage());
+						if($color != null){
+							$dyedColor = Color::averageColor($color, $tile->getCustomColor());
+							//echo "test: " . $dyedColor;//debug
+							$tile->setCustomColor($dyedColor);
+							$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+						}
+					}elseif($item->getId() >= Item::LEATHER_CAP and $item->getId() <= Item::LEATHER_BOOTS){
+						//todo: dyeing
+					}elseif($item->getId() === Item::BUCKET and $item->getId() === 0){//empty bucket
+						//todo: reset
+					}
+				}
 			}
-		}elseif($item->getId() === Item::POTION or $item->getId() === Item::SPLASH_POTION){
-			//todo
-		}elseif($item->getId() === Item::DYE){
-			//todo
 		}
+		
 		return true;
 	}
 }
