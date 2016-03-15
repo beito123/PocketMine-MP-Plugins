@@ -17,29 +17,16 @@
  * 
 */
 
-namespace beito\FlowerPot\extra\ItemFrame\protocol;
+namespace beito\FlowerPot\extra\Cauldron;
 
-use pocketmine\network\protocol\DataPacket;
+use pocketmine\level\sound\GenericSound;
+use pocketmine\math\Vector3;
 
 use beito\FlowerPot\MainClass;
 
-class ItemFrameDropPacket extends DataPacket {
+class ExplodeSound extends GenericSound {
 
-	const NETWORK_ID = MainClass::PROTOCOL_ITEM_FRAME_DROP_ITEM_PACKET;
-
-	public $x;
-	public $y;
-	public $z;
-	public $dropItem;
-
-	public function decode(){
-		$this->z = $this->getInt();//hmm...
-		$this->y = $this->getInt();
-		$this->x = $this->getInt();
-		$this->dropItem = $this->getSlot();
-	}
-
-	public function encode(){
-
+	public function __construct(Vector3 $pos, $pitch = 0){
+		parent::__construct($pos, MainCLass::EVENT_SOUND_EXPLODE, $pitch);
 	}
 }

@@ -95,6 +95,8 @@ class MainClass extends PluginBase implements Listener {
 
 	const BLOCK_CAULDRON = 118;
 
+	const EVENT_SOUND_EXPLODE = 3501;
+
 	const EVENT_SOUND_SPLASH = 3506;
 
 	public function onEnable(){

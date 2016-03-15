@@ -101,7 +101,7 @@ class Cauldron extends Spawnable{
 			$g = $c->getGreen();
 			$b = $c->getBlue();
 		}
-		$color = ($padding << 24 | $r << 16 | $g << 8 | $b) & 0xffffffff;// padding?(4bit), red(4bit), green(4bit), blue(4bit)
+		$color = ($padding << 24 | $r << 16 | $g << 8 | $b) & 0xffffffff;// padding?(8bit), red(8bit), green(8bit), blue(8bit)
 		$this->namedtag->CustomColor = new IntTag("CustomColor", $color);
 
 		$this->spawnToAll();
@@ -124,6 +124,7 @@ class Cauldron extends Spawnable{
 
 		if($this->getPotionId() === 0xffff and $this->getCustomColorPadding() !== 0x00){//todo: fix conditions
 			$nbt->CustomColor = $this->namedtag->CustomColor;
+			$nbt->CustomColor = new IntTag("CustomColor", $this->namedtag["CustomColor"]);
 		}
 		return $nbt;
 	}

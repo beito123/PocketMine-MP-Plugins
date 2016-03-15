@@ -19,9 +19,11 @@
 
 namespace beito\FlowerPot\extra\Cauldron;
 
-use pocketmine\block\Air;
+use pocketmine\block\Air;//todo: import optimization...
 use pocketmine\block\Block;
 use pocketmine\block\Solid;
+use pocketmine\event\player\PlayerBucketEmptyEvent;
+use pocketmine\event\player\PlayerBucketFillEvent;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 use pocketmine\level\Level;
@@ -109,69 +111,98 @@ class BlockCauldron extends Solid {
 		return [];
 	}
 
+	public function badUpdate(){//bad update...
+		$this->getLevel()->setBlock($this, Block::get($this->id, $this->meta + 1), true);
+		$this->getLevel()->setBlock($this, $this, true);
+	}
+
 	public function onActivate(Item $item, Player $player = null){
 		$tile = $this->getLevel()->getTile($this);
 		if($tile instanceof Cauldron){
-			if($tile->getPotionId() === 0xff){
+			if($tile->getPotionId() !== 0xffff){
 				if($item->getId() === Item::POTION or $item->getId() === Item::SPLASH_POTION){
 					//todo
-				}elseif($item->getId() === Item::BUCKET and $this->getDamage() === 8){//water bucket//todo explosion
-
+				}elseif($item->getId() === Item::BUCKET and $this->getDamage() === 8){//water bucket
+					//todo explosion
 				}
-			}else{
-				if($tile->getCustomColorPadding() === 0x00){//water
-					if($item->getId() === Item::BUCKET){//bucket
-						switch($item->getDamage()){//todo: call the PlayerBucket(Empty|Fill)Event
-							case 0://empty
-								if($this->meta === 0x06){//if fill
-									$this->meta = 0x00;//empty
-									$bucket = clone $item;
-									$bucket->setDamage(8);//water bucket
-									$this->getLevel()->setBlock($this, $this, true);
+			}else{//non potion water
+				if($item->getId() === Item::BUCKET){
+					switch($item->getDamage()){
+						case 0://empty bucket
+							if($this->meta === 0x06 and $tile->getCustomColorPadding() === 0x00 and $tile->getPotionId() === 0xffff){
+								$bucket = clone $item;
+								$bucket->setDamage(8);//water bucket
+								Server::getInstance()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $this, 0, $item, $bucket));
+								if(!$ev->isCancelled()){
 									if($player->isSurvival()){
-										$player->getInventory()->setItemInHand($bucket, $player);
+										$player->getInventory()->setItemInHand($ev->getItem(), $player);
 									}
+									$this->meta = 0;//empty
+									$this->getLevel()->setBlock($this, $this, true);
+									$tile->setCustomColor(0xff, 0xff, 0xff, 0x00);//reset color
 									$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
 								}
-								break;
-							case 8://water bucket
-								if($this->meta === 0x00){//if empty
-									$this->meta = 0x06;//fill
-									$bucket = clone $item;
-									$bucket->setDamage(0);//empty bucket
-									$this->getLevel()->setBlock($this, $this, true);
-									if($player->isSurvival()){
-										$player->getInventory()->setItemInHand($bucket, $player);
-									}
-									$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+							}
+							break;
+						case 8://water bucket
+							$bucket = clone $item;
+							$bucket->setDamage(0);//empty bucket
+							Server::getInstance()->getPluginManager()->callEvent($ev = new PlayerBucketEmptyEvent($player, $this, 0, $item, $bucket));
+							if(!$ev->isCancelled()){
+								if($player->isSurvival()){
+									$player->getInventory()->setItemInHand($ev->getItem(), $player);
 								}
-								break;
-						}
-					}elseif($item->getId() === Item::DYE and $this->meta > 0){//set dye color
-						$color = Color::getDyeColor($item->getDamage());
-						if($color != null){
-							$tile->setCustomColor($color);
-							$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
-						}
+								$this->meta = 6;//fill
+								$this->getLevel()->setBlock($this, $this, true);
+								$tile->setCustomColor(0xff, 0xff, 0xff, 0x00);//reset color
+								$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+
+								$this->badUpdate();//bad
+							}
+							break;
 					}
-				}else{//colored water
-					if($item->getId() === Item::DYE){
-						$color = Color::getDyeColor($item->getDamage());
-						if($color != null){
-							$dyedColor = Color::averageColor($color, $tile->getCustomColor());
-							//echo "test: " . $dyedColor;//debug
-							$tile->setCustomColor($dyedColor);
+				}elseif($item->getId() === Item::DYE){
+					$color = Color::getDyeColor($item->getDamage());//currentColor
+					if($tile->getCustomColorPadding() === 0xff){
+						$color = Color::averageColor($color, $tile->getCustomColor());
+					}
+					$tile->setCustomColor($color);
+					$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+
+					//echo "test:" . $color . " code:" . $color->getColorCode();//debug
+					
+					$this->badUpdate();//bad
+				}elseif($item->getId() >= Item::LEATHER_CAP and $item->getId() <= Item::LEATHER_BOOTS){//lether armor
+					if($tile->getCustomColorPadding() === 0x00){
+						if($this->meta > 0){//if has water
+							--$this->meta;
+							$this->getLevel()->setBlock($this, $this, true);
+
+							$newItem = clone $item;
+							Utils::clearCustomColorToArmor($newItem);
+							$player->getInventory()->setItemInHand($newItem);
+
 							$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
 						}
-					}elseif($item->getId() >= Item::LEATHER_CAP and $item->getId() <= Item::LEATHER_BOOTS){
-						//todo: dyeing
-					}elseif($item->getId() === Item::BUCKET and $item->getId() === 0){//empty bucket
-						//todo: reset
+					}else{
+						if($this->meta > 0){//if has water
+							--$this->meta;
+							$this->getLevel()->setBlock($this, $this, true);
+
+							$newItem = clone $item;
+							Utils::setCustomColorToArmor($newItem, $tile->getCustomColor());
+							$player->getInventory()->setItemInHand($newItem);
+
+							$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
+
+							if($this->meta <= 0){
+								$tile->setCustomColor(0xff, 0xff, 0xff, 0x00);//reset color
+							}
+						}
 					}
 				}
 			}
 		}
-		
 		return true;
 	}
 }

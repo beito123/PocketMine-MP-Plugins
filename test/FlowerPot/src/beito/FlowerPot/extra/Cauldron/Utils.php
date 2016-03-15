@@ -17,29 +17,31 @@
  * 
 */
 
-namespace beito\FlowerPot\extra\ItemFrame\protocol;
+namespace beito\FlowerPot\extra\Cauldron;
 
-use pocketmine\network\protocol\DataPacket;
+use pocketmine\item\Item;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\IntTag;
 
-use beito\FlowerPot\MainClass;
+class Utils {
 
-class ItemFrameDropPacket extends DataPacket {
-
-	const NETWORK_ID = MainClass::PROTOCOL_ITEM_FRAME_DROP_ITEM_PACKET;
-
-	public $x;
-	public $y;
-	public $z;
-	public $dropItem;
-
-	public function decode(){
-		$this->z = $this->getInt();//hmm...
-		$this->y = $this->getInt();
-		$this->x = $this->getInt();
-		$this->dropItem = $this->getSlot();
+	public static function setCustomColorToArmor(Item $item, Color $color){
+		if(($hasTag = $item->hasCompoundTag())){
+			$tag = $item->getNamedTag();
+		}else{
+			$tag = new CompoundTag("", array());
+		}
+		$tag->customColor = new IntTag("customColor", $color->getColorCode());
+		$item->setCompoundTag($tag);//
 	}
 
-	public function encode(){
-
+	public static function clearCustomColorToArmor(Item $item){
+		if(!$item->hasCompoundTag()) return;
+		$tag = $item->getNamedTag();
+		if(isset($tag->customColor)){
+			unset($tag->customColor);
+		}
+		$item->setCompoundTag($tag);//
 	}
+
 }

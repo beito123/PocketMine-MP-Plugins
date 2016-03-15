@@ -89,7 +89,7 @@ class Color {
 		if(isset(self::$dyeColors[$id])){
 			return clone self::$dyeColors[$id];
 		}
-		return null;
+		return Color::getRGB(0, 0, 0);
 	}
 
 	public function __construct($r, $g, $b){
@@ -110,7 +110,11 @@ class Color {
 		return (int) $this->green;
 	}
 
+	public function getColorCode(){
+		return ($this->red << 16 | $this->green << 8 | $this->blue) & 0xffffff;
+	}
+
 	public function __toString(){
-		return "Color(red:" . $this->getRed() . ", green:" . $this->getGreen() . ", blue:" . $this->getBlue() . ")";
+		return "Color(red:" . $this->red . ", green:" . $this->green . ", blue:" . $this->blue . ")";
 	}
 }

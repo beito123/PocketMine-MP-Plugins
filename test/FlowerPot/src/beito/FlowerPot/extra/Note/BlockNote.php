@@ -158,6 +158,7 @@ class BlockNote extends Solid{
 			}
 			$tile->setNote($pitch);
 
+			//todo: NotePlayEvent
 			$this->level->addSound(new NoteSound($this, $instrument, $pitch));
 			return true;
 		}
