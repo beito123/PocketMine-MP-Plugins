@@ -48,9 +48,6 @@ class Cauldron extends Spawnable{
 		if(!isset($nbt->Items) or !($nbt->Items instanceof ListTag)){
 			$nbt->Items = new ListTag("Items", []);
 		}
-		if(!isset($nbt->CustomColor)){
-			$nbt->CustomColor = new IntTag("CustomColor", 0xffffffff);//rgb
-		}
 		parent::__construct($chunk, $nbt);
 	}
 
@@ -60,22 +57,41 @@ class Cauldron extends Spawnable{
 
 	public function setPotionId($potionId){
 		$this->namedtag->PotionId = new ShortTag("PotionId", $potionId);
+
+		$this->spawnToAll();
+		if($this->chunk){
+			$this->chunk->setChanged();
+			$this->level->clearChunkCache($this->chunk->getX(), $this->chunk->getZ());
+		}
+	}
+
+	public function hasPotion(){
+		return $this->namedtag["PotionId"] !== 0xffff;
 	}
 
 	public function getSplashPotion(){
-		return ($this->namedtag["SplashPotion"] == 1);
+		return ($this->namedtag["SplashPotion"] == true);
 	}
 
 	public function setSplashPotion($bool){
-		$this->namedtag->SplashPotion = new ShortTag("SplashPotion", ($bool == true) ? 1:0);
+		$this->namedtag->SplashPotion = new ByteTag("SplashPotion", ($bool == true) ? 1:0);
+
+		$this->spawnToAll();
+		if($this->chunk){
+			$this->chunk->setChanged();
+			$this->level->clearChunkCache($this->chunk->getX(), $this->chunk->getZ());
+		}
 	}
 
 	public function getCustomColor(){//
-		$color = $this->namedtag["CustomColor"];
-		$green = ($color >> 8)&0xff;
-		$red = ($color >> 16)&0xff;
-		$blue = ($color)&0xff;
-		return Color::getRGB($red, $green, $blue);
+		if($this->isCustomColor()){
+			$color = $this->namedtag["CustomColor"];
+			$green = ($color >> 8)&0xff;
+			$red = ($color >> 16)&0xff;
+			$blue = ($color)&0xff;
+			return Color::getRGB($red, $green, $blue);
+		}
+		return null;
 	}
 
 	public function getCustomColorRed(){
@@ -90,19 +106,29 @@ class Cauldron extends Spawnable{
 		return ($this->namedtag["CustomColor"])&0xff;
 	}
 
-	public function getCustomColorPadding(){
-		return ($this->namedtag["CustomColor"] >> 24)&0xff;
+	public function isCustomColor(){
+		return isset($this->namedtag->CustomColor);
 	}
 
-	public function setCustomColor($r, $g = 0xff, $b = 0xff, $padding = 0xff){
+	public function setCustomColor($r, $g = 0xff, $b = 0xff){
 		if($r instanceof Color){
-			$c = $r;
-			$r = $c->getRed();
-			$g = $c->getGreen();
-			$b = $c->getBlue();
+			$color = ($r->getRed() << 16 | $r->getGreen() << 8 | $r->getBlue()) & 0xffffff;
+		}else{
+			$color = ($r << 16 | $g << 8 | $b) & 0xffffff;
 		}
-		$color = ($padding << 24 | $r << 16 | $g << 8 | $b) & 0xffffffff;// padding?(8bit), red(8bit), green(8bit), blue(8bit)
 		$this->namedtag->CustomColor = new IntTag("CustomColor", $color);
+
+		$this->spawnToAll();
+		if($this->chunk){
+			$this->chunk->setChanged();
+			$this->level->clearChunkCache($this->chunk->getX(), $this->chunk->getZ());
+		}
+	}
+
+	public function clearCustomColor(){
+		if(isset($this->namedtag->CustomColor)){
+			unset($this->namedtag->CustomColor);
+		}
 
 		$this->spawnToAll();
 		if($this->chunk){
@@ -122,9 +148,8 @@ class Cauldron extends Spawnable{
 			new ListTag("Items", $this->namedtag["Items"])//unused?
 		]);
 
-		if($this->getPotionId() === 0xffff and $this->getCustomColorPadding() !== 0x00){//todo: fix conditions
+		if($this->getPotionId() === 0xffff and $this->isCustomColor()){
 			$nbt->CustomColor = $this->namedtag->CustomColor;
-			$nbt->CustomColor = new IntTag("CustomColor", $this->namedtag["CustomColor"]);
 		}
 		return $nbt;
 	}

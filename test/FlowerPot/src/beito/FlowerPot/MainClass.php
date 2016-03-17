@@ -51,6 +51,8 @@ use beito\FlowerPot\extra\Cauldron\Cauldron;
 use beito\FlowerPot\extra\Cauldron\BlockCauldron;
 use beito\FlowerPot\extra\Cauldron\ItemCauldron;
 use beito\FlowerPot\extra\Cauldron\Color;
+use beito\FlowerPot\extra\Cauldron\potion\Potion;
+use beito\FlowerPot\extra\Cauldron\potion\SplashPotion;
 
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -97,7 +99,11 @@ class MainClass extends PluginBase implements Listener {
 
 	const EVENT_SOUND_EXPLODE = 3501;
 
+	const EVENT_SOUND_SPELL = 3504;
+
 	const EVENT_SOUND_SPLASH = 3506;
+
+	const EVENT_SOUND_GRAY_SPLASH = 3507;//todo: fix name
 
 	public function onEnable(){
 		//flower pot
@@ -152,7 +158,7 @@ class MainClass extends PluginBase implements Listener {
 		//extra: Cauldron
 		
 		//add item
-		Item::$list[self::ITEM_CAULDRON] = ItemCauldron::class;
+		$this->registerItem(self::ITEM_CAULDRON, ItemCauldron::class);
 		//add block
 		$this->registerBlock(self::BLOCK_CAULDRON, BlockCauldron::class);
 		//add block entity(tile)
@@ -161,6 +167,9 @@ class MainClass extends PluginBase implements Listener {
 		$this->addCreativeItem(Item::get(self::ITEM_CAULDRON, 0));
 		//init Color
 		Color::init();
+		//fix max stack
+		$this->registerItem(Item::POTION, Potion::class);
+		$this->registerItem(Item::SPLASH_POTION, SplashPotion::class);
 		
 		Server::getInstance()->getPluginManager()->registerEvents($this, $this);
 	}
@@ -184,6 +193,10 @@ class MainClass extends PluginBase implements Listener {
 				}
 			}
 		}
+	}
+
+	public function registerItem($id, $class){
+		Item::$list[$id] = $class;
 	}
 
 	public function registerBlock($id, $class){
