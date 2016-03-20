@@ -42,10 +42,16 @@ use beito\FlowerPot\extra\BrewingStand\BrewingStand;
 use beito\FlowerPot\extra\BrewingStand\BlockBrewingStand;
 use beito\FlowerPot\extra\BrewingStand\ItemBrewingStand;
 
-use beito\FlowerPot\extra\ItemFrame\block\ItemFrame as BlockItemFrame;
+/*use beito\FlowerPot\extra\ItemFrame\block\ItemFrame as BlockItemFrame;
 use beito\FlowerPot\extra\ItemFrame\item\ItemFrame as ItemItemFrame;
 use beito\FlowerPot\extra\ItemFrame\protocol\ItemFrameDropPacket;
-use beito\FlowerPot\extra\ItemFrame\tile\ItemFrame;
+use beito\FlowerPot\extra\ItemFrame\tile\ItemFrame;*/
+
+use beito\FlowerPot\extra\ItemFrame\BlockItemFrame;
+use beito\FlowerPot\extra\ItemFrame\ItemFrame;
+use beito\FlowerPot\extra\ItemFrame\ItemFrameDropItemEvent;
+use beito\FlowerPot\extra\ItemFrame\ItemFrameDropPacket;
+use beito\FlowerPot\extra\ItemFrame\ItemItemFrame;
 
 use beito\FlowerPot\extra\Cauldron\Cauldron;
 use beito\FlowerPot\extra\Cauldron\BlockCauldron;
@@ -106,9 +112,11 @@ class MainClass extends PluginBase implements Listener {
 	const EVENT_SOUND_GRAY_SPLASH = 3507;//todo: fix name
 
 	public function onEnable(){
+
 		//flower pot
+		
 		//add item
-		Item::$list[self::ITEM_FLOWER_POT] = ItemFlowerPot::class;
+		$this->registerItem(self::ITEM_FLOWER_POT, ItemFlowerPot::class);
 		//add block
 		$this->registerBlock(self::BLOCK_FLOWER_POT, BlockFlowerPot::class);
 		//add block entity(tile)
@@ -119,7 +127,7 @@ class MainClass extends PluginBase implements Listener {
 		//extra: skull
 		
 		//add item
-		Item::$list[self::ITEM_SKULL] = ItemSkull::class;
+		$this->registerItem(self::ITEM_SKULL, ItemSkull::class);
 		//add block
 		$this->registerBlock(self::BLOCK_SKULL, BlockSkull::class);
 		//add block entity(tile)
@@ -134,7 +142,7 @@ class MainClass extends PluginBase implements Listener {
 		//extra: note block
 		
 		//add item(block)
-		Item::$list[self::BLOCK_NOTE] = BlockNote::class;
+		$this->registerItem(self::BLOCK_NOTE, BlockNote::class);
 		//add block
 		$this->registerBlock(self::BLOCK_NOTE, BlockNote::class);
 		//add block entity(tile)
@@ -147,7 +155,7 @@ class MainClass extends PluginBase implements Listener {
 		//add block
 		$this->registerBlock(self::BLOCK_ITEM_FRAME, BlockItemFrame::class);
 		//add item
-		Item::$list[self::ITEM_ITEM_FRAME] = ItemItemFrame::class;
+		$this->registerItem(self::ITEM_ITEM_FRAME, ItemItemFrame::class);
 		//add block entity(tile)
 		Tile::registerTile(ItemFrame::class);
 		//add to creative item
@@ -182,13 +190,31 @@ class MainClass extends PluginBase implements Listener {
 			$player = $event->getPlayer();
 
 			$level = $player->getLevel();
-			$tile = $level->getTile(new Vector3($packet->x, $packet->y, $packet->z));
+			$pos = new Vector3($packet->x, $packet->y, $packet->z);
+			$tile = $level->getTile($pos);
+			$block = $level->getBlock($pos);
 			if($tile instanceof ItemFrame){
-				if($tile->getItem()->getId() !== Item::AIR){
-					if((mt_rand(0, 10) / 10) <= $tile->getItemDropChance()){//
-						$level->dropItem($tile, $tile->getItem());//todo motion and modify the coordinates
+				$ev = new ItemFrameDropItemEvent($block, $player, $tile->getItem(), $tile->getItemDropChance());
+				Server::getInstance()->getPluginManager()->callEvent($ev);
+				if($ev->isCancelled()){
+					$tile->spawnToAll();
+					return;
+				}
+				$item = $ev->getDropItem();
+				if($item->getId() !== Item::AIR){
+					if((mt_rand(0, 10) / 10) <= $ev->getItemDropChance()){//
+						$faces = [
+							1 => [0.1, 0],
+							2 => [0, -0.1],
+							3 => [0, 0.1],
+							4 => [-0.1, 0]
+						];
+						$face = isset($faces[$block->getDamage()]) ? $faces[$block->getDamage()]:null;
+						//todo: fix random...
+						$motion = ($face !== null) ? new Vector3(-$face[0] + (mt_rand(-10, 10) / 100), 0.15, -$face[1] + (mt_rand(-10, 10) / 100)):null;
+						$level->dropItem($pos->add(0.5, 0.3, 0.5), $item, $motion);
 					}
-					$tile->setItem(Item::get(Item::AIR));
+					$tile->setItem(Item::get(Item::AIR));//reset
 					$tile->setItemRotation(0);
 				}
 			}

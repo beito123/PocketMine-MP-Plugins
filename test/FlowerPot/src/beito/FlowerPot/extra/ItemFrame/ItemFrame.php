@@ -17,19 +17,16 @@
  * 
 */
 
-namespace beito\FlowerPot\extra\ItemFrame\tile;
-
-use pocketmine\block\Block;
-use pocketmine\level\format\FullChunk;
-use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\nbt\tag\FloatTag;
+namespace beito\FlowerPot\extra\ItemFrame;
 
 use pocketmine\item\Item;
-use pocketmine\tile\Tile;
+use pocketmine\level\format\FullChunk;
+use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Spawnable;
 
 use beito\FlowerPot\MainClass;

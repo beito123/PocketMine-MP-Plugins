@@ -1,6 +1,7 @@
 name: FlowerPot
-version: 1.0.5
+version: 1.0.6
 api: [2.0.0]
+geniapi: [1.7.1]
 author: beito
 main: beito\FlowerPot\MainClass
 load: STARTUP

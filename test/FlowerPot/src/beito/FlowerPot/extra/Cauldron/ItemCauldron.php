@@ -24,10 +24,14 @@ use pocketmine\item\Item;
 
 use beito\FlowerPot\MainClass;
 
-class ItemCauldron extends Item{
+class ItemCauldron extends Item {
 
 	public function __construct($meta = 0, $count = 1){
 		$this->block = Block::get(MainClass::BLOCK_CAULDRON);
 		parent::__construct(MainClass::ITEM_CAULDRON, $meta, $count, "Cauldron");
+	}
+
+	public function getMaxStackSize() : int{
+		return 1;
 	}
 }

@@ -64,17 +64,6 @@ class BlockCauldron extends Solid {
 		return true;
 	}
 
-	public function getBoundingBox(){//todo fix(?)
-		return new AxisAlignedBB(
-			$this->x,
-			$this->y,
-			$this->z,
-			$this->x + 1,
-			$this->y + 1,
-			$this->z + 1
-		);
-	}
-
 	public function getToolType(){
 		return Tool::TYPE_PICKAXE;
 	}
@@ -248,6 +237,7 @@ class BlockCauldron extends Solid {
 						$this->getLevel()->setBlock($this, $this, true);
 						$tile->setPotionId($item->getDamage());
 						$tile->setSplashPotion($item->getId() === Item::SPLASH_POTION);
+						$tile->clearCustomColor();
 
 						if($player->isSurvival()){
 							$player->getInventory()->setItemInHand(Item::get(Item::GLASS_BOTTLE));

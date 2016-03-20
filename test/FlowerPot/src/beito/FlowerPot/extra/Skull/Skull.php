@@ -34,7 +34,7 @@ use pocketmine\Server;
 
 class Skull extends Spawnable{
 
-	public function __construct(FullChunk $chunk, CompoundTag $nbt){//todo Owner (?)
+	public function __construct(FullChunk $chunk, CompoundTag $nbt){
 		if(!isset($nbt->SkullType)){
 			$nbt->SkullType = new ByteTag("SkullType", 0);
 		}

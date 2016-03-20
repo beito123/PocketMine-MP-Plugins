@@ -17,31 +17,25 @@
  * 
 */
 
-namespace beito\FlowerPot\extra\ItemFrame\block;
+namespace beito\FlowerPot\extra\ItemFrame;
 
-use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\block\Transparent;
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
-use pocketmine\level\Level;
-use pocketmine\math\AxisAlignedBB;
-use pocketmine\Player;
-use pocketmine\Server;
-
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\FloatTag;
-use pocketmine\tile\Tile;
+use pocketmine\level\Level;
 use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
+use pocketmine\tile\Tile;
+use pocketmine\Player;
 
 use beito\FlowerPot\MainClass;
-use beito\FlowerPot\extra\ItemFrame\tile\ItemFrame as TileItemFrame;
 
-class ItemFrame extends Transparent {
+class BlockItemFrame extends Transparent {
 
 	protected $id = MainClass::BLOCK_ITEM_FRAME;
 
@@ -49,7 +43,7 @@ class ItemFrame extends Transparent {
 		$this->meta = $meta;
 	}
 
-	public function getHardness(){
+	public function getHardness(){//
 		return 1;
 	}
 
@@ -65,11 +59,11 @@ class ItemFrame extends Transparent {
 		return "Item Frame";
 	}
 
-	//public function getBoundingBox(){//todo
+	//public function getBoundingBox(){//todo?
 
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		if($face >= 2){
+		if($face > 1){
 			$faces = [
 				2 => 3,
 				3 => 2,
@@ -98,7 +92,7 @@ class ItemFrame extends Transparent {
 
 	public function onActivate(Item $item, Player $player = null){
 		$tile = $this->level->getTile($this);
-		if($tile instanceof TileItemFrame){
+		if($tile instanceof ItemFrame){
 			if($tile->getItem()->getId() === Item::AIR){
 				$tile->setItem(Item::get($item->getId(), $item->getDamage(), 1));
 				$item->setCount($item->getCount() - 1);
@@ -107,6 +101,23 @@ class ItemFrame extends Transparent {
 				$tile->setItemRotation($rot > 8 ? 0:$rot);
 			}
 			return true;
+		}
+		return false;
+	}
+
+	public function onUpdate($type){
+		if($type === Level::BLOCK_UPDATE_NORMAL){
+			$faces = [
+				1 => Vector3::SIDE_EAST,
+				2 => Vector3::SIDE_NORTH,
+				3 => Vector3::SIDE_SOUTH,
+				4 => Vector3::SIDE_WEST
+			];
+			if($this->getSide($faces[$this->meta] ?? -1)->getId() === Item::AIR){//
+				$this->getLevel()->useBreakOn($this);
+
+				return Level::BLOCK_UPDATE_NORMAL;
+			}
 		}
 		return false;
 	}
