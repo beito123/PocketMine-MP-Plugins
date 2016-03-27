@@ -11,7 +11,8 @@ Supported environment(対応している環境): Gensisys(GeniAPI:1.7.1~)
 TODO: all rewrite and remove
 
 ##Change history
-
+###v1.0.7
+- Fixed some bugs
 ###v1.0.6
 - Experimental support of cauldron!
 - ItemFrame: Add a simple motion to item drop.
