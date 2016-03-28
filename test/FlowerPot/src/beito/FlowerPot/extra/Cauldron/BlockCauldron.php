@@ -100,7 +100,7 @@ class BlockCauldron extends Solid {
 		return [];
 	}
 
-	public function badUpdate(){//bad update...
+	public function update(){//umm... right update method...?
 		$this->getLevel()->setBlock($this, Block::get($this->id, $this->meta + 1), true);
 		$this->getLevel()->setBlock($this, $this, true);//Undo the damage value
 	}
@@ -122,7 +122,7 @@ class BlockCauldron extends Solid {
 		switch($item->getId()){
 			case Item::BUCKET:
 				if($item->getDamage() === 0){//empty bucket
-					if(!$this->isFull() and !$tile->isCustomColor() and !$tile->hasPotion()){
+					if(!$this->isFull() or $tile->isCustomColor() or $tile->hasPotion()){
 						break;
 					}
 					$bucket = clone $item;
@@ -159,7 +159,7 @@ class BlockCauldron extends Solid {
 							$tile->clearCustomColor();
 							$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
 						}
-						$this->badUpdate();//bad
+						$this->update();
 					}
 				}
 				break;
@@ -172,7 +172,7 @@ class BlockCauldron extends Solid {
 				$tile->setCustomColor($color);
 				$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
 				
-				$this->badUpdate();//bad
+				$this->update();
 				break;
 			case Item::LEATHER_CAP:
 			case Item::LEATHER_TUNIC:
