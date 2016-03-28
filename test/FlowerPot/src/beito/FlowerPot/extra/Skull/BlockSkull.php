@@ -58,7 +58,7 @@ class BlockSkull extends Transparent{
 		return "Mob Head";
 	}
 
-	public function getBoundingBox(){//Thanks to thebigsmileXD!
+	public function getBoundingBox(){//Thanks to @thebigsmileXD!
 		return new AxisAlignedBB(
 			$this->x - 0.75,
 			$this->y - 0.5,

@@ -26,8 +26,7 @@ use pocketmine\item\Item;
 use pocketmine\tile\Tile;
 use pocketmine\entity\Entity;
 
-use pocketmine\inventory\CraftingManager;
-use pocketmine\inventory\ShapedRecipe;
+use pocketmine\inventory\BigShapedRecipe;
 
 use pocketmine\Server;
 
@@ -41,11 +40,6 @@ use beito\FlowerPot\extra\Note\BlockNote;
 use beito\FlowerPot\extra\BrewingStand\BrewingStand;
 use beito\FlowerPot\extra\BrewingStand\BlockBrewingStand;
 use beito\FlowerPot\extra\BrewingStand\ItemBrewingStand;
-
-/*use beito\FlowerPot\extra\ItemFrame\block\ItemFrame as BlockItemFrame;
-use beito\FlowerPot\extra\ItemFrame\item\ItemFrame as ItemItemFrame;
-use beito\FlowerPot\extra\ItemFrame\protocol\ItemFrameDropPacket;
-use beito\FlowerPot\extra\ItemFrame\tile\ItemFrame;*/
 
 use beito\FlowerPot\extra\ItemFrame\BlockItemFrame;
 use beito\FlowerPot\extra\ItemFrame\ItemFrame;
@@ -178,6 +172,38 @@ class MainClass extends PluginBase implements Listener {
 		//fix max stack
 		$this->registerItem(Item::POTION, Potion::class);
 		$this->registerItem(Item::SPLASH_POTION, SplashPotion::class);
+
+		//Recipes
+		
+		$craftingManager = Server::getInstance()->getCraftingManager();
+		
+		//.FlowerPot
+		$craftingManager->registerRecipe((new BigShapedRecipe(Item::get(MainClass::ITEM_FLOWER_POT, 0, 1),
+			"B B",
+			" B ",
+			"   "
+		))->setIngredient("B", Item::get(Item::BRICK, null, 1)));
+
+		//.NoteBlock
+		$craftingManager->registerRecipe((new BigShapedRecipe(Item::get(MainClass::BLOCK_NOTE, 0, 1),
+			"PPP",
+			"PRP",
+			"PPP"
+		))->setIngredient("P", Item::get(Item::PLANK, null, 1))->setIngredient("R", Item::get(Item::REDSTONE, null, 1)));
+
+		//.ItemFrame
+		$craftingManager->registerRecipe((new BigShapedRecipe(Item::get(MainClass::ITEM_ITEM_FRAME, 0, 1),
+			"SSS",
+			"SLS",
+			"SSS"
+		))->setIngredient("S", Item::get(Item::STICK, null, 1))->setIngredient("L", Item::get(Item::LEATHER, null, 1)));
+
+		//.Cauldron
+		$craftingManager->registerRecipe((new BigShapedRecipe(Item::get(MainClass::ITEM_CAULDRON, 0, 1),
+			"I I",
+			"I I",
+			"III"
+		))->setIngredient("I", Item::get(Item::IRON_INGOT, null, 1)));
 		
 		Server::getInstance()->getPluginManager()->registerEvents($this, $this);
 	}
@@ -194,6 +220,7 @@ class MainClass extends PluginBase implements Listener {
 			$tile = $level->getTile($pos);
 			$block = $level->getBlock($pos);
 			if($tile instanceof ItemFrame){
+				//for Protection plugin
 				$ev = new ItemFrameDropItemEvent($block, $player, $tile->getItem(), $tile->getItemDropChance());
 				Server::getInstance()->getPluginManager()->callEvent($ev);
 				if($ev->isCancelled()){
