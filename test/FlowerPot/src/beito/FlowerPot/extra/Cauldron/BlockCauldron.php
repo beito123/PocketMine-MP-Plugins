@@ -138,7 +138,9 @@ class BlockCauldron extends Solid {
 						$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
 					}
 				}elseif($item->getDamage() === 8){//water bucket
-					if($this->isFull() and !$tile->isCustomColor() and !$tile->hasPotion()) break;
+					if($this->isFull() and !$tile->isCustomColor() and !$tile->hasPotion()){
+						break;
+					}
 					$bucket = clone $item;
 					$bucket->setDamage(0);//empty bucket
 					Server::getInstance()->getPluginManager()->callEvent($ev = new PlayerBucketEmptyEvent($player, $this, 0, $item, $bucket));
@@ -168,6 +170,12 @@ class BlockCauldron extends Solid {
 				$color = Color::getDyeColor($item->getDamage());
 				if($tile->isCustomColor()){
 					$color = Color::averageColor($color, $tile->getCustomColor());
+				}
+				if($player->isSurvival()){
+					$item->setCount($item->getCount() - 1);
+					/*if($item->getCount() <= 0){
+						$player->getInventory()->setItemInHand(Item::get(Item::AIR));
+					}*/
 				}
 				$tile->setCustomColor($color);
 				$this->getLevel()->addSound(new SplashSound($this->add(0.5, 1, 0.5)));
