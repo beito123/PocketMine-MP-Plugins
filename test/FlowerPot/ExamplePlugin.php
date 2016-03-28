@@ -1,13 +1,13 @@
 <?php
 /**
- * SamplePlugin
- * @name SamplePlugin
- * @main beito\SamplePlugin\MainClass
+ * ExamplePlugin
+ * @name ExamplePlugin
+ * @main beito\ExamplePlugin\MainClass
  * @version 1.0.0
  * @api 2.0.0
  * @author beito
  */
-namespace beito\SamplePlugin{
+namespace beito\ExamplePlugin{
 	use pocketmine\plugin\PluginBase;
 	use pocketmine\Server;
 	use pocketmine\Player;
