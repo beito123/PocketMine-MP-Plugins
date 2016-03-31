@@ -212,36 +212,43 @@ class MainClass extends PluginBase implements Listener {
 		$packet = $event->getPacket();
 		if($packet::NETWORK_ID === MainClass::PROTOCOL_ITEM_FRAME_DROP_ITEM_PACKET){
 			//var_dump($packet);//debug
-			
+
 			$player = $event->getPlayer();
 
 			$level = $player->getLevel();
 			$pos = new Vector3($packet->x, $packet->y, $packet->z);
+
 			$tile = $level->getTile($pos);
-			$block = $level->getBlock($pos);
 			if($tile instanceof ItemFrame){
-				//for Protection plugin
+				$block = $level->getBlock($pos);
+
 				$ev = new ItemFrameDropItemEvent($block, $player, $tile->getItem(), $tile->getItemDropChance());
 				Server::getInstance()->getPluginManager()->callEvent($ev);
+
 				if($ev->isCancelled()){
 					$tile->spawnToAll();
 					return;
 				}
+
 				$item = $ev->getDropItem();
 				if($item->getId() !== Item::AIR){
-					if((mt_rand(0, 10) / 10) <= $ev->getItemDropChance()){//
+					if((mt_rand(1, 100) / 100) <= $ev->getItemDropChance()){
 						$faces = [
 							1 => [0.1, 0],
 							2 => [0, -0.1],
 							3 => [0, 0.1],
 							4 => [-0.1, 0]
 						];
-						$face = isset($faces[$block->getDamage()]) ? $faces[$block->getDamage()]:null;
-						//todo: fix random...
-						$motion = ($face !== null) ? new Vector3(-$face[0] + (mt_rand(-10, 10) / 100), 0.15, -$face[1] + (mt_rand(-10, 10) / 100)):null;
-						$level->dropItem($pos->add(0.5, 0.3, 0.5), $item, $motion);
+						$face = $faces[$block->getDamage()] ?? null;
+						if($face !== null){
+							//todo: fix random...
+							$motion = new Vector3(-$face[0] + (mt_rand(-10, 10) / 100), 0.15, -$face[1] + (mt_rand(-10, 10) / 100));
+						}
+						$level->dropItem($pos->add(0.5, 0.3, 0.5), $item, $motion ?? null);
+						$tile->setItem(Item::get(Item::AIR));
+						$tile->setItemRotation(0);
 					}
-					$tile->setItem(Item::get(Item::AIR));//reset
+					$tile->setItem(Item::get(Item::AIR));
 					$tile->setItemRotation(0);
 				}
 			}

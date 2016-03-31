@@ -70,19 +70,34 @@ class BlockItemFrame extends Transparent {
 				4 => 1,
 				5 => 4,
 			];
+
 			$itemTag = NBT::putItemHelper(Item::get(Item::AIR));
 			$itemTag->setName("Item");
+
 			$nbt = new CompoundTag("", [
 				new StringTag("id", MainClass::TILE_ITEM_FRAME),
 				new IntTag("x", $block->x),
 				new IntTag("y", $block->y),
 				new IntTag("z", $block->z),
-				$itemTag,
-				new FloatTag("ItemDropChance", 1),
+				new CompoundTag("Item", $itemTag->getValue()),
+				new FloatTag("ItemDropChance", 1.0),
 				new ByteTag("ItemRotation", 0)
 			]);
-			$chunk = $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4);
-			Tile::createTile("ItemFrame", $chunk, $nbt);
+
+			if($item->hasCustomBlockData()){
+				foreach($item->getCustomBlockData() as $key => $value){
+					//Reformat: support "Item" tag by give command
+					if($key === "Item" and $value instanceof CompoundTag){
+						$value = NBT::putItemHelper(NBT::getItemHelper($value));
+						$value->setName("Item");
+					}
+					$nbt->{$key} = $value;
+				}
+			}
+
+			//var_dump($nbt);//debug
+
+			Tile::createTile("ItemFrame", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 
 			$this->getLevel()->setBlock($block, Block::get(MainClass::BLOCK_ITEM_FRAME, $faces[$face]), true, true);
 			return true;

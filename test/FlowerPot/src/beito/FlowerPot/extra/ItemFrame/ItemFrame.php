@@ -26,6 +26,7 @@ use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Spawnable;
 
@@ -35,13 +36,13 @@ class ItemFrame extends Spawnable {
 
 	public function __construct(FullChunk $chunk, CompoundTag $nbt){
 		if(!isset($nbt->Item) or !($nbt->Item instanceof CompoundTag)){
-			$item = NBT::putItemHelper(Item::get(Item::AIR));
-			$item->setName("Item");
-			$nbt->Item = $item;
+			$tag = NBT::putItemHelper(Item::get(Item::AIR));
+			$tag->setName("Item");
+			$nbt->Item = $tag;
 		}
 
 		if(!isset($nbt->ItemDropChance)){
-			$nbt->ItemDropChance = new FloatTag("ItemDropChance", 1);
+			$nbt->ItemDropChance = new FloatTag("ItemDropChance", 1.0);
 		}
 
 		if(!isset($nbt->ItemRotation)){
@@ -56,9 +57,9 @@ class ItemFrame extends Spawnable {
 	}
 
 	public function setItem(Item $item){
-		$item = NBT::putItemHelper($item);
-		$item->setName("Item");
-		$this->namedtag->Item = $item;
+		$tag = NBT::putItemHelper($item);
+		$tag->setName("Item");
+		$this->namedtag->Item = $tag;
 
 		$this->spawnToAll();
 
@@ -72,8 +73,8 @@ class ItemFrame extends Spawnable {
 		return $this->namedtag["ItemDropChance"];
 	}
 
-	public function setItemDropChance($probability = 1){
-		$this->namedtag->ItemDropChance = new FloatTag("ItemDropChance", $probability);
+	public function setItemDropChance($chance = 1){
+		$this->namedtag->ItemDropChance = new FloatTag("ItemDropChance", $chance);
 	}
 
 	public function getItemRotation(){
