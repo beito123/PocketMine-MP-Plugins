@@ -204,7 +204,7 @@ class MainClass extends PluginBase implements Listener {
 			"I I",
 			"III"
 		))->setIngredient("I", Item::get(Item::IRON_INGOT, null, 1)));
-		
+
 		Server::getInstance()->getPluginManager()->registerEvents($this, $this);
 	}
 

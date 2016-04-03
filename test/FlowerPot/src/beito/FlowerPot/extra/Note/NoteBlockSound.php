@@ -23,7 +23,7 @@ use pocketmine\level\sound\Sound;
 use pocketmine\math\Vector3;
 use pocketmine\network\protocol\BlockEventPacket;
 
-class NoteSound extends Sound {
+class NoteblockSound extends Sound {
 
 	const INSTRUMENT_PIANO = 0;
 	const INSTRUMENT_BASEDRUM = 1;
