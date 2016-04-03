@@ -104,6 +104,8 @@ class MainClass extends PluginBase implements Listener {
 		
 		//add block
 		$this->registerBlock(self::BLOCK_NOTE, BlockNote::class);
+		//add item
+		Item::$list[self::BLOCK_NOTE] = BlockNote::class;
 		//add block entity(tile)
 		Tile::registerTile(Note::class);
 		//add creative item

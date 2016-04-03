@@ -61,18 +61,16 @@ class BlockNote extends Solid{
 	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		if(!$target->canBeActivated()){
-			$this->getLevel()->setBlock($this, $this, true, true);
-			$nbt = new Compound("", [
-				new String("id", MainClass::TILE_NOTE),
-				new Int("x", $block->x),
-				new Int("y", $block->y),
-				new Int("z", $block->z),
-				new Byte("note", 0)
-			]);
-			$pot = Tile::createTile("Note", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
-			return true;
-		}
+		$this->getLevel()->setBlock($this, $this, true, true);
+		$nbt = new Compound("", [
+			new String("id", MainClass::TILE_NOTE),
+			new Int("x", $block->x),
+			new Int("y", $block->y),
+			new Int("z", $block->z),
+			new Byte("note", 0)
+		]);
+		$pot = Tile::createTile("Note", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
+		return true;
 	}
 
 	public function getInstrument(){
@@ -104,12 +102,12 @@ class BlockNote extends Solid{
 			case Block::WALL_SIGN:
 			case Block::DOOR_BLOCK:
 			case MainClass::BLOCK_NOTE:
-				return NoteSound::INSTRUMENT_BASEGUITAR;
+				return NoteBlockSound::INSTRUMENT_BASEGUITAR;
 			case Block::SAND:
-				return NoteSound::INSTRUMENT_SNARE;
+				return NoteBlockSound::INSTRUMENT_SNARE;
 			case Block::GLASS:
 			case Block::GLASS_PANE:
-				return NoteSound::INSTRUMENT_CLICKS;
+				return NoteBlockSound::INSTRUMENT_CLICKS;
 			case Block::STONE:
 			case Block::COBBLESTONE:
 			case Block::SANDSTONE:
@@ -145,9 +143,9 @@ class BlockNote extends Solid{
 			case Block::END_STONE:
 			case Block::STAINED_CLAY:
 			case Block::COAL_BLOCK:
-				return NoteSound::INSTRUMENT_BASEDRUM;
+				return NoteBlockSound::INSTRUMENT_BASEDRUM;
 		}
-		return NoteSound::INSTRUMENT_PIANO;
+		return NoteBlockSound::INSTRUMENT_PIANO;
 	}
 
 	public function onActivate(Item $item, Player $player = null){
@@ -160,7 +158,7 @@ class BlockNote extends Solid{
 			}
 			$tile->setNote($pitch);
 
-			$this->level->addSound(new NoteSound($this, $instrument, $pitch));
+			$this->level->addSound(new NoteBlockSound($this, $instrument, $pitch));
 			return true;
 		}
 		return false;
