@@ -102,12 +102,12 @@ class BlockNote extends Solid{
 			case Block::WALL_SIGN:
 			case Block::DOOR_BLOCK:
 			case MainClass::BLOCK_NOTE:
-				return NoteBlockSound::INSTRUMENT_BASEGUITAR;
+				return NoteblockSound::INSTRUMENT_BASEGUITAR;
 			case Block::SAND:
-				return NoteBlockSound::INSTRUMENT_SNARE;
+				return NoteblockSound::INSTRUMENT_SNARE;
 			case Block::GLASS:
 			case Block::GLASS_PANE:
-				return NoteBlockSound::INSTRUMENT_CLICKS;
+				return NoteblockSound::INSTRUMENT_CLICKS;
 			case Block::STONE:
 			case Block::COBBLESTONE:
 			case Block::SANDSTONE:
@@ -143,9 +143,9 @@ class BlockNote extends Solid{
 			case Block::END_STONE:
 			case Block::STAINED_CLAY:
 			case Block::COAL_BLOCK:
-				return NoteBlockSound::INSTRUMENT_BASEDRUM;
+				return NoteblockSound::INSTRUMENT_BASEDRUM;
 		}
-		return NoteBlockSound::INSTRUMENT_PIANO;
+		return NoteblockSound::INSTRUMENT_PIANO;
 	}
 
 	public function onActivate(Item $item, Player $player = null){
@@ -158,7 +158,7 @@ class BlockNote extends Solid{
 			}
 			$tile->setNote($pitch);
 
-			$this->level->addSound(new NoteBlockSound($this, $instrument, $pitch));
+			$this->level->addSound(new NoteblockSound($this, $instrument, $pitch));
 			return true;
 		}
 		return false;
