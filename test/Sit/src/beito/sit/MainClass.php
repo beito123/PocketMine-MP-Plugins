@@ -37,7 +37,7 @@ use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\SetEntityLinkPacket;
 
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\FloatTag;
 
@@ -45,35 +45,34 @@ use beito\sit\entity\Chair;
 
 class MainClass extends PluginBase implements Listener {
 
-	private $usedChairs = array();
+	private $usingChairs = array();
 
-	public function onEnable(){
+	public function onEnable() {
 		Entity::registerEntity(Chair::class, true);
+
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 	}
 
-	public function onDisable(){
-		foreach($this->usedChairs as $chair){
-			$chair->close();
-		}
+	public function onDisable() {
+		$this->closeAllChairs();
 	}
 
-	public function onDeath(PlayerDeathEvent $event){//死亡時用close
+	public function onDeath(PlayerDeathEvent $event) {//for dead
 		$this->closeOldChair($event->getEntity());
 	}
 
-	public function onDespawn(EntityDespawnEvent $event){//退出時などにChairをcloseするように
+	public function onDespawn(EntityDespawnEvent $event) {//close for teleport and quit from server
 		$entity = $event->getEntity();
 		if($entity instanceof Player){
 			$this->closeOldChair($entity);
 		}
 	}
 
-	public function onBedEnter(PlayerBedEnterEvent $event){//対策...
+	public function onBedEnter(PlayerBedEnterEvent $event) {
 		$this->closeOldChair($event->getPlayer());
 	}
 
-	public function onInteract(DataPacketReceiveEvent $event){
+	public function onDataPacketReceive(DataPacketReceiveEvent $event){
 		$packet = $event->getPacket();
 		if($event->getPacket()->pid() === Info::INTERACT_PACKET){
 			$packet = $event->getPacket();
@@ -94,11 +93,11 @@ class MainClass extends PluginBase implements Listener {
 		switch(strtolower($command->getName())){
 			case "sit":
 				if(!($sender instanceof Player)){
-					$sender->sendMessage("ゲーム内で実行して下さい。");
+					$sender->sendMessage("Please run in the game.");
 					break;
 				}
 
-				if($sender->isSleeping()){//対策...
+				if($sender->isSleeping()){
 					$sender->stopSleep();
 				}
 
@@ -107,27 +106,39 @@ class MainClass extends PluginBase implements Listener {
 				$x = $sender->getX();
 				$y = $sender->getY();
 				$z = $sender->getZ();
-				if($sender->getLevel()->getBlock($sender->getSide(Vector3::SIDE_DOWN)) instanceof Stair){
-					$x = ((int) $x) + 0.5;
-					$y = (((int) $y) - 1) + 0.2;
-					$z = ((int) $z) + 0.5;
+				
+				if(($block = $sender->getLevel()->getBlock($sender->getSide(Vector3::SIDE_DOWN)) or 
+					$block = $sender->getLevel()->getBlock($sender))
+						and $block instanceof Stair and $block->getDamage() < 0x04) {
+					$d = [
+						0 => [-0.2, 0],
+						1 => [0.2, 0],
+						2 => [0, -0.2],
+						3 => [0, 0.2]
+					];
+
+					$x = $block->getX() + 0.5 + $d[$block->getDamage()][0];//center of block
+					$z = $block->getZ() + 0.5 + $d[$block->getDamage()][1];
+
+					$y = $block->getY() + 1.6;
+
+					echo $block->getDamage();
 				}else{
-					$y -= 0.2;
-					//$y = ((int) $y) - 0.25;
+					$y += 1.13;//fix pos
 				}
 
 				$entity = Entity::createEntity("Chair", $sender->chunk, new CompoundTag("", [
-					"Pos" => new EnumTag("Pos", [
+					"Pos" => new ListTag("Pos", [
 						new DoubleTag("", $x),
 						new DoubleTag("", $y),
 						new DoubleTag("", $z)
 					]),
-					"Motion" => new EnumTag("Motion", [
+					"Motion" => new ListTag("Motion", [
 						new DoubleTag("", 0),
 						new DoubleTag("", 0),
 						new DoubleTag("", 0)
 					]),
-					"Rotation" => new EnumTag("Rotation", [
+					"Rotation" => new ListTag("Rotation", [
 						new FloatTag("", 0),
 						new FloatTag("", 0)
 					])
@@ -136,18 +147,24 @@ class MainClass extends PluginBase implements Listener {
 
 				$entity->sitEntity($sender);
 
-				$sender->sendTip("ジャンプすることで立ち上がれます");
+				$sender->sendTip("Stand up by jumping");
 
-				$this->usedChairs[$sender->getName()] = $entity;
+				$this->usingChairs[$sender->getName()] = $entity;
 				break;
 		}
 		return true;
 	}
 
 	public function closeOldChair(Player $player){
-		if(isset($this->usedChairs[$player->getName()])){
-			$this->usedChairs[$player->getName()]->close();
-			unset($this->usedChairs[$player->getName()]);
+		if(isset($this->usingChairs[$player->getName()])){
+			$this->usingChairs[$player->getName()]->close();
+			unset($this->usingChairs[$player->getName()]);
+		}
+	}
+
+	public function closeAllChairs() {
+		foreach($this->usingChairs as $chair) {
+			$chair->close();
 		}
 	}
 }

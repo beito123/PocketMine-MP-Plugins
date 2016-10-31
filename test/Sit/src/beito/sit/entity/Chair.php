@@ -33,13 +33,25 @@ class Chair extends Entity {
 
 	const NETWORK_ID = -1;
 
-	const SITTING_ACTION_ID = 2;
+	const ACTION_STTING = 2;
 
-	const STAND_ACTION_ID = 3;
-
-	public $canCollide = false;
+	const ACTION_STANDING = 3;
 
 	private $sittingEntity = null;
+
+	protected $dataProperties = [
+		self::DATA_FLAGS => [self::DATA_TYPE_LONG, 
+			1 << Entity::DATA_FLAG_INVISIBLE |
+			1 << Entity::DATA_FLAG_IMMOBILE],
+		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
+		self::DATA_LEAD_HOLDER_EID => [self::DATA_TYPE_LONG, -1],
+		self::DATA_SCALE => [self::DATA_TYPE_FLOAT, 1],
+		self::DATA_BOUNDING_BOX_WIDTH => [Entity::DATA_TYPE_FLOAT, 0.0],
+		self::DATA_BOUNDING_BOX_HEIGHT => [Entity::DATA_TYPE_FLOAT, 0.0],
+		self::DATA_URL_TAG => [Entity::DATA_TYPE_STRING, "https://exmaple.com/"]
+	];
+
+	public $keepMovement = true;
 
 	protected function initEntity(){
 		parent::initEntity();
@@ -61,16 +73,14 @@ class Chair extends Entity {
 		$pk->speedZ = 0;
 		$pk->yaw = 0;
 		$pk->pitch = 0;
-		$pk->metadata = [
-			Entity::DATA_FLAGS => [Entity::DATA_TYPE_BYTE, 1 << Entity::DATA_FLAG_INVISIBLE],
-			Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, ""],
-			Entity::DATA_SHOW_NAMETAG => [Entity::DATA_TYPE_BYTE, 1],
-			Entity::DATA_NO_AI => [Entity::DATA_TYPE_BYTE, 1]
-		];
+		$flags = 0;
+		
+		$pk->metadata = $this->dataProperties;
+
 		$player->dataPacket($pk);
 
 		if($this->sittingEntity !== null){
-			$this->sendLinkPacket($player, self::SITTING_ACTION_ID);
+			$this->sendLinkPacket($player, self::ACTION_STTING);
 		}
 
 		parent::spawnTo($player);
@@ -90,6 +100,11 @@ class Chair extends Entity {
 		$this->namedtag->remove = new ByteTag("remove", 1);//remove flag
 	}
 
+	
+	public function checkBlockCollision() {
+		return;
+	}
+
 	//
 	
 	public function getSittingEntity(){
@@ -103,10 +118,10 @@ class Chair extends Entity {
 
 		$this->sittingEntity = $entity;
 
-		$this->sendLinkPacketToAll(self::SITTING_ACTION_ID);
+		$this->sendLinkPacketToAll(self::ACTION_STTING);
 		
 		if($this->sittingEntity instanceof Player){
-			$this->sendLinkPacketToSittingPlayer(self::SITTING_ACTION_ID);
+			$this->sendLinkPacketToSittingPlayer(self::ACTION_STTING);
 		}
 
 		return true;
@@ -117,10 +132,10 @@ class Chair extends Entity {
 			return false;
 		}
 
-		$this->sendLinkPacketToAll(self::STAND_ACTION_ID);
+		$this->sendLinkPacketToAll(self::ACTION_STANDING);
 		
 		if($this->sittingEntity instanceof Player){
-			$this->sendLinkPacketToSittingPlayer(self::STAND_ACTION_ID);
+			$this->sendLinkPacketToSittingPlayer(self::ACTION_STANDING);
 		}
 
 		$this->sittingEntity = null;
