@@ -1,5 +1,12 @@
 # PocketMine-Plugins
-This repo is put my plugins for PocketMine-MP.
+This repo has my plugins for PocketMine-MP.
+
+This repo will not be updated in the future.
+
+
+Sub: https://github.com/beito123/PocketMine-MP-plugins-sub
+
+(and sorry, I'm busy lately... :P)
 
 ## License
 These plugins are licensed under LGPLv3 License.  
